@@ -1,0 +1,294 @@
+{
+  "id": "coreclawGoogleMapsLeadsStarterGlobal",
+  "name": "CoreClaw Google Maps Leads Starter Global",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## CoreClaw Google Maps Leads - Starter Global\\n\\nStarts a CoreClaw Google Maps keyword run and returns `run_slug`.\\n\\nAfter import, select your own CoreClaw API credential on each CoreClaw node.",
+        "width": 520,
+        "height": 240
+      },
+      "id": "note-starter",
+      "name": "Setup Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        -260
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "keyword",
+              "name": "keyword",
+              "value": "coffee shop",
+              "type": "string"
+            },
+            {
+              "id": "base_location",
+              "name": "base_location",
+              "value": "New York, USA",
+              "type": "string"
+            },
+            {
+              "id": "max_results",
+              "name": "max_results",
+              "value": 5,
+              "type": "number"
+            },
+            {
+              "id": "lang",
+              "name": "lang",
+              "value": "en-US",
+              "type": "string"
+            },
+            {
+              "id": "fetch_reviews",
+              "name": "fetch_reviews",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "fetch_social_info",
+              "name": "fetch_social_info",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "max_reviews_per_place",
+              "name": "max_reviews_per_place",
+              "value": 5,
+              "type": "number"
+            },
+            {
+              "id": "result_limit",
+              "name": "result_limit",
+              "value": 20,
+              "type": "number"
+            },
+            {
+              "id": "max_results_hard_limit",
+              "name": "max_results_hard_limit",
+              "value": 100,
+              "type": "number"
+            },
+            {
+              "id": "wait_seconds",
+              "name": "wait_seconds",
+              "value": 30,
+              "type": "number"
+            },
+            {
+              "id": "cpus",
+              "name": "cpus",
+              "value": 1,
+              "type": "number"
+            },
+            {
+              "id": "memory",
+              "name": "memory",
+              "value": 4096,
+              "type": "number"
+            },
+            {
+              "id": "execute_limit_time_seconds",
+              "name": "execute_limit_time_seconds",
+              "value": 900,
+              "type": "number"
+            },
+            {
+              "id": "max_total_charge",
+              "name": "max_total_charge",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "max_total_traffic",
+              "name": "max_total_traffic",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "export_filter_keys",
+              "name": "export_filter_keys",
+              "value": "title,address,phone,website,review_rating,review_count,primary_category,url",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "campaign-config",
+      "name": "Campaign Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -520,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "scraper",
+        "operation": "getDetails",
+        "scraperSlug": {
+          "__rl": true,
+          "mode": "id",
+          "value": "01KPD6M5YQADCQKGVKPDZVYC63",
+          "cachedResultName": "Google Map Details By Keyword"
+        }
+      },
+      "id": "get-scraper-details",
+      "name": "Get Current Scraper Details",
+      "type": "n8n-nodes-coreclaw.coreClaw",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        120
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notesInFlow": true,
+      "notes": "Select your own CoreClaw API credential after importing this workflow."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const detail = $input.all()[0]?.json ?? {};\nconst cfg = $node[\"Campaign Config\"].json;\n\nconst version = detail.version;\nif (!version) {\n  throw new Error(\"CoreClaw scraper detail did not include a version. Re-check the scraper slug or API response.\");\n}\n\nconst keyword = String(cfg.keyword ?? \"\").trim();\nconst baseLocation = String(cfg.base_location ?? \"\").trim();\nif (!keyword) throw new Error(\"keyword is required.\");\nif (!baseLocation) throw new Error(\"base_location is required.\");\n\nconst hardLimit = Math.max(1, Number(cfg.max_results_hard_limit || 100));\nconst maxResults = Math.min(Math.max(1, Number(cfg.max_results || 5)), hardLimit);\nconst fetchReviews = Boolean(cfg.fetch_reviews);\nconst fetchSocialInfo = Boolean(cfg.fetch_social_info);\n\nreturn [{\n  json: {\n    scraper_slug: \"01KPD6M5YQADCQKGVKPDZVYC63\",\n    scraper_title: \"Google Map Details By Keyword\",\n    version,\n    keyword,\n    base_location: baseLocation,\n    max_results: maxResults,\n    result_limit: Math.max(1, Number(cfg.result_limit || maxResults || 20)),\n    wait_seconds: Math.max(5, Number(cfg.wait_seconds || 30)),\n    max_poll_attempts: 6,\n    export_filter_keys: String(cfg.export_filter_keys || \"title,address,phone,website,review_rating,review_count,primary_category,url\"),\n    customParams: JSON.stringify({\n      url: [{\n        lang: String(cfg.lang || \"en-US\"),\n        keyword,\n        max_results: maxResults,\n        base_location: baseLocation,\n        fetch_reviews: fetchReviews,\n        fetch_social_info: fetchSocialInfo,\n        max_reviews_per_place: Math.max(0, Number(cfg.max_reviews_per_place || 0)),\n      }],\n    }),\n    systemParams: JSON.stringify({\n      cpus: Math.max(1, Number(cfg.cpus || 1)),\n      memory: Math.max(1024, Number(cfg.memory || 4096)),\n      execute_limit_time_seconds: Math.max(60, Number(cfg.execute_limit_time_seconds || 900)),\n      max_total_charge: Math.max(0, Number(cfg.max_total_charge || 0)),\n      max_total_traffic: Math.max(0, Number(cfg.max_total_traffic || 0)),\n    }),\n  },\n}];"
+      },
+      "id": "build-run-parameters",
+      "name": "Build Run Parameters",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "scraper",
+        "operation": "run",
+        "scraperSlug": {
+          "__rl": true,
+          "mode": "id",
+          "value": "01KPD6M5YQADCQKGVKPDZVYC63",
+          "cachedResultName": "Google Map Details By Keyword"
+        },
+        "version": "={{ $json.version }}",
+        "customParams": "={{ $json.customParams }}",
+        "additionalFields": {
+          "systemParams": "={{ $json.systemParams }}"
+        }
+      },
+      "id": "start-coreclaw-run",
+      "name": "Start CoreClaw Run",
+      "type": "n8n-nodes-coreclaw.coreClaw",
+      "typeVersion": 1,
+      "position": [
+        260,
+        120
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notesInFlow": true,
+      "notes": "Select your own CoreClaw API credential after importing this workflow."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const run = $input.all()[0]?.json ?? {};\nconst cfg = $node[\"Build Run Parameters\"].json;\nreturn [{\n  json: {\n    outcome: \"started\",\n    run_slug: run.run_slug,\n    scraper_slug: cfg.scraper_slug,\n    scraper_title: cfg.scraper_title,\n    version: cfg.version,\n    keyword: cfg.keyword,\n    base_location: cfg.base_location,\n    requested_max_results: cfg.max_results,\n    next_step: \"Use Run > Get, Get Results, Export Results, or Logs with this run_slug after the run completes.\",\n  },\n}];"
+      },
+      "id": "build-starter-summary",
+      "name": "Build Starter Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        120
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Campaign Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Campaign Config": {
+      "main": [
+        [
+          {
+            "node": "Get Current Scraper Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Current Scraper Details": {
+      "main": [
+        [
+          {
+            "node": "Build Run Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Run Parameters": {
+      "main": [
+        [
+          {
+            "node": "Start CoreClaw Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start CoreClaw Run": {
+      "main": [
+        [
+          {
+            "node": "Build Starter Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "staticData": null,
+  "meta": {},
+  "pinData": {},
+  "tags": []
+}
