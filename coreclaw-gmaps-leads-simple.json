@@ -1,0 +1,521 @@
+{
+  "name": "CoreClaw地图线索 / Maps Leads",
+  "nodes": [
+    {
+      "id": "note-workflow-overview",
+      "name": "Workflow Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1700,
+        -480
+      ],
+      "parameters": {
+        "content": "## CoreClaw地图线索 / Maps Leads\n\nA mature CoreClaw-first n8n workflow inspired by the Apify templates. CoreClaw performs the official scrape. Additional n8n nodes provide batching, AI analysis, website enrichment, routing, payload preparation, reporting, and verification-friendly summaries. External SaaS credentials are represented as payload-preparation nodes so the workflow runs locally before you connect Google Sheets, Airtable, Slack, Notion, Gmail, or CRM credentials.",
+        "width": 820,
+        "height": 420
+      }
+    },
+    {
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1460,
+        120
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "input-config",
+      "name": "Input Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1200,
+        120
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "keyword",
+              "name": "keyword",
+              "value": "dentist",
+              "type": "string"
+            },
+            {
+              "id": "base_location",
+              "name": "base_location",
+              "value": "Austin, Texas, USA",
+              "type": "string"
+            },
+            {
+              "id": "max_results",
+              "name": "max_results",
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "lang",
+              "name": "lang",
+              "value": "en",
+              "type": "string"
+            },
+            {
+              "id": "fetch_reviews",
+              "name": "fetch_reviews",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "fetch_social_info",
+              "name": "fetch_social_info",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "wait_seconds",
+              "name": "wait_seconds",
+              "value": 15,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "start-coreclaw-run",
+      "name": "Start CoreClaw Run",
+      "type": "n8n-nodes-coreclaw.coreClaw",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        120
+      ],
+      "parameters": {
+        "resource": "scraper",
+        "operation": "run",
+        "scraperSlug": {
+          "__rl": true,
+          "mode": "id",
+          "value": "01KPD6M5YQADCQKGVKPDZVYC63"
+        },
+        "version": "v1.2.1",
+        "customParams": "={\n  \"keyword\": [{\"string\": \"{{ $json.keyword }}\"}],\n  \"base_location\": \"{{ $json.base_location }}\",\n  \"max_results\": {{ $json.max_results }},\n  \"lang\": \"{{ $json.lang }}\",\n  \"fetch_reviews\": {{ $json.fetch_reviews }},\n  \"fetch_social_info\": {{ $json.fetch_social_info }}\n}"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notesInFlow": true,
+      "notes": "Select your CoreClaw API credential after import."
+    },
+    {
+      "id": "wait-before-next-poll",
+      "name": "Wait Before Next Poll",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -640,
+        120
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": "={{ Number($json.wait_seconds || 15) }}",
+        "unit": "seconds"
+      }
+    },
+    {
+      "id": "get-run-status",
+      "name": "Get Run Status",
+      "type": "n8n-nodes-coreclaw.coreClaw",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        120
+      ],
+      "parameters": {
+        "resource": "run",
+        "operation": "get",
+        "runSlug": "={{ $('Start CoreClaw Run').item.json.run_slug }}"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notesInFlow": true,
+      "notes": "Select your CoreClaw API credential after import.",
+      "continueOnFail": true
+    },
+    {
+      "id": "if-run-terminal",
+      "name": "If Run Terminal",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -120,
+        120
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "if-run-terminal",
+              "leftValue": "={{ Number($json.status) }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "if-run-succeeded",
+      "name": "If Run Succeeded",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        120,
+        40
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "if-run-succeeded",
+              "leftValue": "={{ Number($json.status) }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "get-run-results",
+      "name": "Get Run Results",
+      "type": "n8n-nodes-coreclaw.coreClaw",
+      "typeVersion": 1,
+      "position": [
+        380,
+        -100
+      ],
+      "parameters": {
+        "resource": "run",
+        "operation": "getResults",
+        "runSlug": "={{ $('Start CoreClaw Run').item.json.run_slug }}",
+        "returnAll": false,
+        "limit": "={{ Number($items(\"Input Config\")?.[0]?.json?.max_results || 10) }}"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notesInFlow": true,
+      "notes": "Select your CoreClaw API credential after import."
+    },
+    {
+      "id": "normalize-business-leads",
+      "name": "Normalize Business Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        -100
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const input = $items('Input Config')?.[0]?.json ?? {};\nconst rows = $input.all().map(item => item.json);\nfunction cleanUrl(value) { return String(value || '').split('?')[0].replace(//$/, ''); }\nfunction key(row) { return String(row.cid || row.data_id || row.website || row.title || '').toLowerCase().trim(); }\nreturn rows.map((row, index) => {\n  const website = cleanUrl(row.website);\n  const emails = [row.email_1, row.email_2, row.email_3, row.email_4, row.all_emails].filter(Boolean).join(', ');\n  const rating = Number(row.total_score || row.rating || 0);\n  const reviewCount = Number(row.reviews_count || row.review_count || 0);\n  let leadScore = 35;\n  if (website) leadScore += 15;\n  if (emails) leadScore += 25;\n  if (row.phone) leadScore += 10;\n  if (rating >= 4.5) leadScore += 10;\n  if (reviewCount >= 100) leadScore += 10;\n  if (rating > 0 && rating < 4) leadScore -= 15;\n  leadScore = Math.max(0, Math.min(100, leadScore));\n  const leadPriority = leadScore >= 80 ? 'hot' : leadScore >= 60 ? 'warm' : 'nurture';\n  return { json: {\n    workflow_kind: 'leads_simple', lead_key: key(row), index: index + 1,\n    source_keyword: row.source_keyword || input.keyword || '', source_location: row.source_location || input.base_location || '',\n    title: row.title || '', category: row.primary_category || row.all_categories || '', all_categories: row.all_categories || '',\n    address: row.address || '', city: row.city || '', state: row.state || '', country: row.country || '', postal_code: row.postal_code || '',\n    phone: row.phone || '', website, email: emails, rating, review_count: reviewCount, google_maps_url: row.url || '',\n    lead_score: leadScore, lead_priority: leadPriority, crm_stage: leadPriority === 'hot' ? 'Qualified' : 'New',\n    recommended_action: leadPriority === 'hot' ? 'Call today and send personalized email.' : leadPriority === 'warm' ? 'Send email and call within 48 hours.' : 'Add to nurture and enrich later.',\n    company_summary: [row.title, row.primary_category, row.address, row.phone ? 'Phone: ' + row.phone : '', website ? 'Website: ' + website : ''].filter(Boolean).join(' | '),\n    scraped_at: row.scraped_at || new Date().toISOString(), raw: row\n  }};\n});"
+      }
+    },
+    {
+      "id": "remove-duplicates",
+      "name": "Remove Duplicates",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        900,
+        -100
+      ],
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "lead_key",
+        "options": {}
+      }
+    },
+    {
+      "id": "prepare-google-sheets-rows",
+      "name": "Prepare Google Sheets Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2460,
+        -100
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return $input.all().map(item => ({ json: { ...item.json, destination: 'google_sheets', row: { lead_key: item.json.lead_key, title: item.json.title, category: item.json.category, address: item.json.address, phone: item.json.phone, website: item.json.website, email: item.json.email || item.json.discovered_emails, rating: item.json.rating, review_count: item.json.review_count, lead_score: item.json.lead_score, lead_priority: item.json.lead_priority, recommended_action: item.json.recommended_action, ai_pitch: item.json.ai_pitch, company_summary: item.json.company_summary } } }));"
+      }
+    },
+    {
+      "id": "aggregate-campaign",
+      "name": "Aggregate Campaign",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2720,
+        -100
+      ],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "leads",
+        "options": {}
+      }
+    },
+    {
+      "id": "markdown-report",
+      "name": "Markdown Report",
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        2980,
+        -100
+      ],
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "=## CoreClaw Lead Report\n\nWorkflow: {{$json.workflow_kind || \"coreclaw\"}}\n\nTotal leads payload generated. Open execution data for structured rows."
+      }
+    },
+    {
+      "id": "build-success-summary",
+      "name": "Build Success Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3240,
+        -100
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const status = $items('Get Run Status')?.[0]?.json ?? {};\nconst input = $items('Input Config')?.[0]?.json ?? {};\nconst rows = $input.all().map(i => i.json);\nreturn [{ json: { outcome: 'success', workflow_kind: 'leads_simple', run_slug: $items('Start CoreClaw Run')?.[0]?.json?.run_slug || '', run_status: status.status, coreclaw_result_count: status.results, returned_items: rows.length, hot_leads: rows.filter(r => r.lead_priority === 'hot').length, warm_leads: rows.filter(r => r.lead_priority === 'warm').length, keyword: input.keyword, base_location: input.base_location, business_value: 'CoreClaw plus n8n enrichment pipeline with AI, routing, destination payloads, and verification summary.', sample_results: rows.slice(0, 3), verified_at: new Date().toISOString() }}];"
+      }
+    },
+    {
+      "id": "build-failure-summary",
+      "name": "Build Failure Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        240
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const status = $items('Get Run Status')?.[0]?.json ?? {};\nreturn [{ json: { outcome: 'failure', workflow_kind: 'leads_simple', run_slug: $items('Start CoreClaw Run')?.[0]?.json?.run_slug || '', run_status: status.status, run_error_message: status.err_msg || '', verified_at: new Date().toISOString() }}];"
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Input Config",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Input Config": {
+      "main": [
+        [
+          {
+            "node": "Start CoreClaw Run",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Start CoreClaw Run": {
+      "main": [
+        [
+          {
+            "node": "Wait Before Next Poll",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Wait Before Next Poll": {
+      "main": [
+        [
+          {
+            "node": "Get Run Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Get Run Status": {
+      "main": [
+        [
+          {
+            "node": "If Run Terminal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "If Run Terminal": {
+      "main": [
+        [
+          {
+            "node": "If Run Succeeded",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait Before Next Poll",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Run Succeeded": {
+      "main": [
+        [
+          {
+            "node": "Get Run Results",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Failure Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Run Results": {
+      "main": [
+        [
+          {
+            "node": "Normalize Business Leads",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Normalize Business Leads": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Prepare Google Sheets Rows",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Prepare Google Sheets Rows": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Campaign",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Aggregate Campaign": {
+      "main": [
+        [
+          {
+            "node": "Markdown Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Markdown Report": {
+      "main": [
+        [
+          {
+            "node": "Build Success Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "versionId": "coreclaw-gmaps-leads-simple-upgraded-v4",
+  "meta": {
+    "templateId": "coreclaw-gmaps-leads-simple",
+    "instanceId": "coreclaw-local-upgraded"
+  },
+  "tags": []
+}

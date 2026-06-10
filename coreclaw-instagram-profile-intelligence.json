@@ -1,0 +1,687 @@
+{
+  "name": "CoreClaw Instagram账号情报 / Instagram Intel",
+  "nodes": [
+    {
+      "id": "note-overview",
+      "name": "Overview / ??",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        -460
+      ],
+      "parameters": {
+        "content": "## CoreClaw Instagram账号情报 / Instagram Intel\n\nBilingual local n8n workflow name. CoreClaw official node runs the scraper; standard n8n nodes add AI analysis, routing, aggregation, and payloads for business teams.\n\n??????? CoreClaw ??????????? n8n ?????? AI ??????????????????",
+        "width": 820,
+        "height": 420
+      }
+    },
+    {
+      "id": "manual-trigger",
+      "name": "Manual Trigger / ????",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1460,
+        120
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "input-config",
+      "name": "Input Config / ????",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1200,
+        120
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "username",
+              "name": "username",
+              "value": "instagram",
+              "type": "string"
+            },
+            {
+              "id": "limit",
+              "name": "limit",
+              "value": 1,
+              "type": "number"
+            },
+            {
+              "id": "wait_seconds",
+              "name": "wait_seconds",
+              "value": 10,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "start-coreclaw-run",
+      "name": "Start CoreClaw Run / ?? CoreClaw",
+      "type": "n8n-nodes-coreclaw.coreClaw",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        120
+      ],
+      "parameters": {
+        "resource": "scraper",
+        "operation": "run",
+        "scraperSlug": {
+          "__rl": true,
+          "mode": "id",
+          "value": "01KPD6M5YVHWCNQCRK3W1JD9W2"
+        },
+        "version": "v1.0.2",
+        "customParams": "={\n  \"username\": [{\"string\": \"{{ $json.username }}\"}]\n}"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notesInFlow": true,
+      "notes": "Select your CoreClaw API credential after import."
+    },
+    {
+      "id": "wait-before-next-poll",
+      "name": "Wait Before Poll / ????",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -640,
+        120
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": "={{ Number($json.wait_seconds || 15) }}",
+        "unit": "seconds"
+      }
+    },
+    {
+      "id": "get-run-status",
+      "name": "Get Run Status / ????",
+      "type": "n8n-nodes-coreclaw.coreClaw",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        120
+      ],
+      "parameters": {
+        "resource": "run",
+        "operation": "get",
+        "runSlug": "={{ $('Start CoreClaw Run / ?? CoreClaw').item.json.run_slug }}"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notesInFlow": true,
+      "notes": "Select your CoreClaw API credential after import."
+    },
+    {
+      "id": "if-terminal",
+      "name": "If Terminal / ????",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -120,
+        120
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "if-terminal",
+              "leftValue": "={{ Number($json.status) }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "if-success",
+      "name": "If Success / ????",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        120,
+        40
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "if-success",
+              "leftValue": "={{ Number($json.status) }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "get-run-results",
+      "name": "Get Run Results / ????",
+      "type": "n8n-nodes-coreclaw.coreClaw",
+      "typeVersion": 1,
+      "position": [
+        380,
+        -100
+      ],
+      "parameters": {
+        "resource": "run",
+        "operation": "getResults",
+        "runSlug": "={{ $('Start CoreClaw Run / ?? CoreClaw').item.json.run_slug }}",
+        "returnAll": false,
+        "limit": "={{ Number($items(\"Input Config / ????\")?.[0]?.json?.limit || 10) }}"
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notesInFlow": true,
+      "notes": "Select your CoreClaw API credential after import."
+    },
+    {
+      "id": "normalize-records",
+      "name": "Normalize Records / ???",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        -100
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return $input.all().map((item,index)=>{const r=item.json; const followers=Number(r.followers_count||r.followers||0); const posts=Number(r.posts_count||r.posts||0); const verified=Boolean(r.is_verified); const score=Math.min(100,(verified?30:0)+(followers>1000000?40:followers>100000?30:followers>10000?20:10)+(posts>100?15:5)); return {json:{record_key:String(r.id||r.account||r.profile_url||index).toLowerCase(),workflow_kind:'instagram_profile_intel',account:r.account||'',profile_name:r.profile_name||r.full_name||'',profile_url:r.profile_url||r.url||'',followers_count:followers,posts_count:posts,is_verified:verified,is_business_account:r.is_business_account,opportunity_score:score,priority:score>=70?'high':'normal',action:score>=70?'Shortlist for influencer or brand partnership review.':'Monitor profile for later campaign fit.',raw:r}}});"
+      }
+    },
+    {
+      "id": "remove-duplicates",
+      "name": "Remove Duplicates / ??",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        900,
+        -100
+      ],
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "record_key",
+        "options": {}
+      }
+    },
+    {
+      "id": "loop-items",
+      "name": "Loop Items / ????",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1160,
+        -100
+      ],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "ai-analysis",
+      "name": "AI Analysis / AI ??",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1420,
+        -100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://maas-coding-api.cn-huabei-1.xf-yun.com/v2/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_LLM_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specfyBody": "json",
+        "jsonBody": "={\"model\":\"astron-code-latest\",\"temperature\":0.2,\"messages\":[{\"role\":\"system\",\"content\":\"Return concise JSON only for commercial workflow automation.\"},{\"role\":\"user\",\"content\":\"Analyze this record for business use. Return JSON fields: opportunity, risk, action, priority. Record: \" + JSON.stringify($json)}]}",
+        "options": {
+          "timeout": 60000
+        }
+      }
+    },
+    {
+      "id": "parse-ai",
+      "name": "Parse AI / ?? AI",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        -100
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return $input.all().map(item=>{const content=item.json.choices?.[0]?.message?.content||''; const cleaned=content.replace(/^s*```jsons*/i,'').replace(/```s*$/,'').trim(); let ai={}; try{ai=JSON.parse(cleaned)}catch(e){ai={raw:content}} const base=$items('Loop Items / ????')?.[0]?.json||{}; return {json:{...base,ai_opportunity:ai.opportunity||'',ai_risk:ai.risk||'',ai_action:ai.action||'',ai_priority:ai.priority||base.priority||'',ai_raw:ai}}})"
+      }
+    },
+    {
+      "id": "route-priority",
+      "name": "Route Priority / ?????",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1940,
+        -100
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.priority || $json.ai_priority }}",
+                    "rightValue": "high",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "High"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Normal"
+        }
+      }
+    },
+    {
+      "id": "noop-high-priority-queue-",
+      "name": "High Priority Queue / ??????",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        -220
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "noop-normal-queue-",
+      "name": "Normal Queue / ????",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        -20
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "prepare-payloads",
+      "name": "Prepare Payloads / ????",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2460,
+        -100
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return $input.all().map(item=>({json:{...item.json,destination_payloads:{google_sheets:item.json,airtable:{fields:item.json},slack:{text:(item.json.title||item.json.account||'CoreClaw record')+' | '+(item.json.ai_action||item.json.action||'review')},notion:{title:item.json.title||item.json.account||item.json.record_key,properties:item.json}}}}));"
+      }
+    },
+    {
+      "id": "aggregate-results",
+      "name": "Aggregate Results / ????",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2720,
+        -100
+      ],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "records",
+        "options": {}
+      }
+    },
+    {
+      "id": "markdown-report",
+      "name": "Markdown Report / Markdown ??",
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        2980,
+        -100
+      ],
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "=## CoreClaw Automation Report\n\n{{$json.records ? $json.records.length : 0}} records prepared for business operations."
+      }
+    },
+    {
+      "id": "success-summary",
+      "name": "Success Summary / ????",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3240,
+        -100
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const rows=$input.all().map(i=>i.json); const st=$items('Get Run Status / ????')?.[0]?.json||{}; return [{json:{outcome:'success',workflow_name:'CoreClaw Instagram Profile Intel / Instagram????',run_slug:$items('Start CoreClaw Run / ?? CoreClaw')?.[0]?.json?.run_slug||'',run_status:st.status,result_count:st.results,returned_items:rows.length,commercial_value:'Business-ready CoreClaw workflow with AI analysis, routing, payloads, and reporting.',sample:rows.slice(0,3),verified_at:new Date().toISOString()}}];"
+      }
+    },
+    {
+      "id": "failure-summary",
+      "name": "Failure Summary / ????",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        240
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const st=$items('Get Run Status / ????')?.[0]?.json||{}; return [{json:{outcome:'failure',workflow_name:'CoreClaw Instagram Profile Intel / Instagram????',run_status:st.status,error:st.err_msg||'',verified_at:new Date().toISOString()}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger / ????": {
+      "main": [
+        [
+          {
+            "node": "Input Config / ????",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Input Config / ????": {
+      "main": [
+        [
+          {
+            "node": "Start CoreClaw Run / ?? CoreClaw",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Start CoreClaw Run / ?? CoreClaw": {
+      "main": [
+        [
+          {
+            "node": "Wait Before Poll / ????",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Wait Before Poll / ????": {
+      "main": [
+        [
+          {
+            "node": "Get Run Status / ????",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Get Run Status / ????": {
+      "main": [
+        [
+          {
+            "node": "If Terminal / ????",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "If Terminal / ????": {
+      "main": [
+        [
+          {
+            "node": "If Success / ????",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait Before Poll / ????",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Success / ????": {
+      "main": [
+        [
+          {
+            "node": "Get Run Results / ????",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Failure Summary / ????",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Run Results / ????": {
+      "main": [
+        [
+          {
+            "node": "Normalize Records / ???",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Normalize Records / ???": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates / ??",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Remove Duplicates / ??": {
+      "main": [
+        [
+          {
+            "node": "Loop Items / ????",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Loop Items / ????": {
+      "main": [
+        [
+          {
+            "node": "AI Analysis / AI ??",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "AI Analysis / AI ??": {
+      "main": [
+        [
+          {
+            "node": "Parse AI / ?? AI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Parse AI / ?? AI": {
+      "main": [
+        [
+          {
+            "node": "Route Priority / ?????",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Route Priority / ?????": {
+      "main": [
+        [
+          {
+            "node": "High Priority Queue / ??????",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Normal Queue / ????",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "High Priority Queue / ??????": {
+      "main": [
+        [
+          {
+            "node": "Prepare Payloads / ????",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Prepare Payloads / ????": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results / ????",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Aggregate Results / ????": {
+      "main": [
+        [
+          {
+            "node": "Markdown Report / Markdown ??",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Markdown Report / Markdown ??": {
+      "main": [
+        [
+          {
+            "node": "Success Summary / ????",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "versionId": "coreclaw-instagram-profile-intelligence-commercial-v1",
+  "meta": {
+    "templateId": "coreclaw-instagram-profile-intelligence",
+    "instanceId": "coreclaw-commercial-pack"
+  },
+  "tags": []
+}

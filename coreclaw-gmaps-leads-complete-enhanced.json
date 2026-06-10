@@ -1,5 +1,5 @@
 {
-  "name": "CoreClaw全球拓客 / Global Prospecting",
+  "name": "CoreClaw完整线索运营 / Lead Ops",
   "nodes": [
     {
       "id": "note-workflow-overview",
@@ -11,7 +11,7 @@
         -480
       ],
       "parameters": {
-        "content": "## CoreClaw全球拓客 / Global Prospecting\n\nA mature CoreClaw-first n8n workflow inspired by the Apify templates. CoreClaw performs the official scrape. Additional n8n nodes provide batching, AI analysis, website enrichment, routing, payload preparation, reporting, and verification-friendly summaries. External SaaS credentials are represented as payload-preparation nodes so the workflow runs locally before you connect Google Sheets, Airtable, Slack, Notion, Gmail, or CRM credentials.",
+        "content": "## CoreClaw完整线索运营 / Lead Ops\n\nA mature CoreClaw-first n8n workflow inspired by the Apify templates. CoreClaw performs the official scrape. Additional n8n nodes provide batching, AI analysis, website enrichment, routing, payload preparation, reporting, and verification-friendly summaries. External SaaS credentials are represented as payload-preparation nodes so the workflow runs locally before you connect Google Sheets, Airtable, Slack, Notion, Gmail, or CRM credentials.",
         "width": 820,
         "height": 420
       }
@@ -42,13 +42,13 @@
             {
               "id": "keyword",
               "name": "keyword",
-              "value": "restaurant",
+              "value": "dentist",
               "type": "string"
             },
             {
               "id": "base_location",
               "name": "base_location",
-              "value": "Singapore",
+              "value": "Austin, Texas, USA",
               "type": "string"
             },
             {
@@ -247,7 +247,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const input = $items('Input Config')?.[0]?.json ?? {};\nconst rows = $input.all().map(item => item.json);\nfunction cleanUrl(value) { return String(value || '').split('?')[0].replace(//$/, ''); }\nfunction key(row) { return String(row.cid || row.data_id || row.website || row.title || '').toLowerCase().trim(); }\nreturn rows.map((row, index) => {\n  const website = cleanUrl(row.website);\n  const emails = [row.email_1, row.email_2, row.email_3, row.email_4, row.all_emails].filter(Boolean).join(', ');\n  const rating = Number(row.total_score || row.rating || 0);\n  const reviewCount = Number(row.reviews_count || row.review_count || 0);\n  let leadScore = 35;\n  if (website) leadScore += 15;\n  if (emails) leadScore += 25;\n  if (row.phone) leadScore += 10;\n  if (rating >= 4.5) leadScore += 10;\n  if (reviewCount >= 100) leadScore += 10;\n  if (rating > 0 && rating < 4) leadScore -= 15;\n  leadScore = Math.max(0, Math.min(100, leadScore));\n  const leadPriority = leadScore >= 80 ? 'hot' : leadScore >= 60 ? 'warm' : 'nurture';\n  return { json: {\n    workflow_kind: 'global_advanced', lead_key: key(row), index: index + 1,\n    source_keyword: row.source_keyword || input.keyword || '', source_location: row.source_location || input.base_location || '',\n    title: row.title || '', category: row.primary_category || row.all_categories || '', all_categories: row.all_categories || '',\n    address: row.address || '', city: row.city || '', state: row.state || '', country: row.country || '', postal_code: row.postal_code || '',\n    phone: row.phone || '', website, email: emails, rating, review_count: reviewCount, google_maps_url: row.url || '',\n    lead_score: leadScore, lead_priority: leadPriority, crm_stage: leadPriority === 'hot' ? 'Qualified' : 'New',\n    recommended_action: leadPriority === 'hot' ? 'Call today and send personalized email.' : leadPriority === 'warm' ? 'Send email and call within 48 hours.' : 'Add to nurture and enrich later.',\n    company_summary: [row.title, row.primary_category, row.address, row.phone ? 'Phone: ' + row.phone : '', website ? 'Website: ' + website : ''].filter(Boolean).join(' | '),\n    scraped_at: row.scraped_at || new Date().toISOString(), raw: row\n  }};\n});"
+        "jsCode": "const input = $items('Input Config')?.[0]?.json ?? {};\nconst rows = $input.all().map(item => item.json);\nfunction cleanUrl(value) { return String(value || '').split('?')[0].replace(//$/, ''); }\nfunction key(row) { return String(row.cid || row.data_id || row.website || row.title || '').toLowerCase().trim(); }\nreturn rows.map((row, index) => {\n  const website = cleanUrl(row.website);\n  const emails = [row.email_1, row.email_2, row.email_3, row.email_4, row.all_emails].filter(Boolean).join(', ');\n  const rating = Number(row.total_score || row.rating || 0);\n  const reviewCount = Number(row.reviews_count || row.review_count || 0);\n  let leadScore = 35;\n  if (website) leadScore += 15;\n  if (emails) leadScore += 25;\n  if (row.phone) leadScore += 10;\n  if (rating >= 4.5) leadScore += 10;\n  if (reviewCount >= 100) leadScore += 10;\n  if (rating > 0 && rating < 4) leadScore -= 15;\n  leadScore = Math.max(0, Math.min(100, leadScore));\n  const leadPriority = leadScore >= 80 ? 'hot' : leadScore >= 60 ? 'warm' : 'nurture';\n  return { json: {\n    workflow_kind: 'complete_ops_advanced', lead_key: key(row), index: index + 1,\n    source_keyword: row.source_keyword || input.keyword || '', source_location: row.source_location || input.base_location || '',\n    title: row.title || '', category: row.primary_category || row.all_categories || '', all_categories: row.all_categories || '',\n    address: row.address || '', city: row.city || '', state: row.state || '', country: row.country || '', postal_code: row.postal_code || '',\n    phone: row.phone || '', website, email: emails, rating, review_count: reviewCount, google_maps_url: row.url || '',\n    lead_score: leadScore, lead_priority: leadPriority, crm_stage: leadPriority === 'hot' ? 'Qualified' : 'New',\n    recommended_action: leadPriority === 'hot' ? 'Call today and send personalized email.' : leadPriority === 'warm' ? 'Send email and call within 48 hours.' : 'Add to nurture and enrich later.',\n    company_summary: [row.title, row.primary_category, row.address, row.phone ? 'Phone: ' + row.phone : '', website ? 'Website: ' + website : ''].filter(Boolean).join(' | '),\n    scraped_at: row.scraped_at || new Date().toISOString(), raw: row\n  }};\n});"
       }
     },
     {
@@ -489,20 +489,6 @@
       }
     },
     {
-      "id": "prepare-slack-alerts",
-      "name": "Prepare Slack Alerts",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2460,
-        -100
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "return $input.all().map(item => ({ json: { ...item.json, destination: 'slack', slack_text: '[' + item.json.lead_priority.toUpperCase() + '] ' + item.json.title + ' | Score ' + item.json.lead_score + ' | ' + item.json.recommended_action } }));"
-      }
-    },
-    {
       "id": "prepare-notion-pages",
       "name": "Prepare Notion Pages",
       "type": "n8n-nodes-base.code",
@@ -556,7 +542,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const status = $items('Get Run Status')?.[0]?.json ?? {};\nconst input = $items('Input Config')?.[0]?.json ?? {};\nconst rows = $input.all().map(i => i.json);\nreturn [{ json: { outcome: 'success', workflow_kind: 'global_advanced', run_slug: $items('Start CoreClaw Run')?.[0]?.json?.run_slug || '', run_status: status.status, coreclaw_result_count: status.results, returned_items: rows.length, hot_leads: rows.filter(r => r.lead_priority === 'hot').length, warm_leads: rows.filter(r => r.lead_priority === 'warm').length, keyword: input.keyword, base_location: input.base_location, business_value: 'CoreClaw plus n8n enrichment pipeline with AI, routing, destination payloads, and verification summary.', sample_results: rows.slice(0, 3), verified_at: new Date().toISOString() }}];"
+        "jsCode": "const status = $items('Get Run Status')?.[0]?.json ?? {};\nconst input = $items('Input Config')?.[0]?.json ?? {};\nconst rows = $input.all().map(i => i.json);\nreturn [{ json: { outcome: 'success', workflow_kind: 'complete_ops_advanced', run_slug: $items('Start CoreClaw Run')?.[0]?.json?.run_slug || '', run_status: status.status, coreclaw_result_count: status.results, returned_items: rows.length, hot_leads: rows.filter(r => r.lead_priority === 'hot').length, warm_leads: rows.filter(r => r.lead_priority === 'warm').length, keyword: input.keyword, base_location: input.base_location, business_value: 'CoreClaw plus n8n enrichment pipeline with AI, routing, destination payloads, and verification summary.', sample_results: rows.slice(0, 3), verified_at: new Date().toISOString() }}];"
       }
     },
     {
@@ -570,7 +556,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const status = $items('Get Run Status')?.[0]?.json ?? {};\nreturn [{ json: { outcome: 'failure', workflow_kind: 'global_advanced', run_slug: $items('Start CoreClaw Run')?.[0]?.json?.run_slug || '', run_status: status.status, run_error_message: status.err_msg || '', verified_at: new Date().toISOString() }}];"
+        "jsCode": "const status = $items('Get Run Status')?.[0]?.json ?? {};\nreturn [{ json: { outcome: 'failure', workflow_kind: 'complete_ops_advanced', run_slug: $items('Start CoreClaw Run')?.[0]?.json?.run_slug || '', run_status: status.status, run_error_message: status.err_msg || '', verified_at: new Date().toISOString() }}];"
       }
     }
   ],
@@ -820,18 +806,6 @@
       "main": [
         [
           {
-            "node": "Prepare Slack Alerts",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
-      ]
-    },
-    "Prepare Slack Alerts": {
-      "main": [
-        [
-          {
             "node": "Prepare Notion Pages",
             "type": "main",
             "index": 0
@@ -882,9 +856,9 @@
     "executionOrder": "v1",
     "saveManualExecutions": true
   },
-  "versionId": "coreclaw-google-maps-leads-complete-global-upgraded-v4",
+  "versionId": "coreclaw-gmaps-leads-complete-enhanced-upgraded-v4",
   "meta": {
-    "templateId": "coreclaw-google-maps-leads-complete-global",
+    "templateId": "coreclaw-gmaps-leads-complete-enhanced",
     "instanceId": "coreclaw-local-upgraded"
   },
   "tags": []

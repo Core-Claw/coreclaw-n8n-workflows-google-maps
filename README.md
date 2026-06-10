@@ -1,80 +1,57 @@
-# CoreClaw Google Maps Leads n8n Workflow
+﻿# CoreClaw n8n Commercial Workflow Pack
 
-One complete n8n workflow for running the CoreClaw **Google Map Details By Keyword** scraper and exporting Google Maps lead data.
+This repository contains business-ready n8n workflows built around the official CoreClaw n8n node. The pack is inspired by mature Apify workflow templates, but CoreClaw is the primary scraping and data-extraction platform.
 
-## File
+## Workflows
 
-| File | Purpose |
-| --- | --- |
-| `coreclaw-google-maps-leads-complete-global.json` | Complete n8n workflow: scraper discovery, live scraper details, generated campaign config, run start, live polling, results, CSV/JSON export, and logs |
-
-Raw import URL:
-
-```text
-https://raw.githubusercontent.com/Core-Claw/coreclaw-n8n-workflows-google-maps/main/coreclaw-google-maps-leads-complete-global.json
-```
-
-## What It Does
-
-The workflow:
-
-1. Searches CoreClaw Store for the Google Maps keyword scraper.
-2. Selects **Google Map Details By Keyword**.
-3. Reads the live scraper details before each run.
-4. Uses the current scraper `version` from CoreClaw.
-5. Builds `customParams` from the live scraper schema and user inputs.
-6. Reuses system defaults from the live scraper details.
-7. Starts the CoreClaw run.
-8. Polls until CoreClaw returns a terminal status.
-9. Fetches result preview, exports CSV and JSON, and retrieves logs.
-
-## Requirements
-
-- A self-hosted n8n instance.
-- The `n8n-nodes-coreclaw` community node installed.
-- A CoreClaw API credential created in n8n.
-
-n8n Cloud may not allow unverified community nodes. If the CoreClaw node is unavailable, use self-hosted n8n.
-
-## Import And Run
-
-1. Open n8n.
-2. Import `coreclaw-google-maps-leads-complete-global.json`, or import from the raw URL above.
-3. Select your CoreClaw credential on every CoreClaw node.
-4. Open **Lead Search Input**.
-5. Edit the fields you need.
-6. Execute the workflow.
-
-## User Inputs
-
-Only the **Lead Search Input** node normally needs editing:
-
-| Field | Meaning | Example |
+| File | Local n8n Name | Use Case |
 | --- | --- | --- |
-| `keyword` | Google Maps search keyword | `coffee shop` |
-| `base_location` | Search location | `New York, USA` |
-| `max_results` | Maximum lead count to request | `3` |
-| `fetch_reviews` | Whether to fetch review data | `false` |
-| `fetch_social_info` | Whether to enrich websites/social profiles | `false` |
-| `wait_seconds` | Delay between polling attempts | `10` |
+| `coreclaw-gmaps-leads-simple.json` | CoreClaw地图线索 / Maps Leads | Local business lead scraping |
+| `coreclaw-gmaps-leads-email-extraction-simple.json` | CoreClaw地图邮箱 / Maps Email | Website email enrichment |
+| `coreclaw-gmaps-b2b-enrichment-simple.json` | CoreClaw B2B增强 / B2B Enrich | AI-assisted B2B lead enrichment |
+| `coreclaw-gmaps-reviews-monitor-simple.json` | CoreClaw评论监控 / Reviews Monitor | Lightweight reputation monitoring |
+| `coreclaw-gmaps-to-sheets.json` | CoreClaw表格线索 / Sheets Leads | Google Sheets-ready lead operations |
+| `coreclaw-gmaps-leads-email-extraction.json` | CoreClaw外联线索 / Email Outreach | AI pitch and outreach payloads |
+| `coreclaw-gmaps-airtable-email.json` | CoreClaw Airtable管道 / Airtable Pipeline | Airtable or CRM pipeline payloads |
+| `coreclaw-gmaps-leads-complete-enhanced.json` | CoreClaw完整线索运营 / Lead Ops | Multi-destination lead operations |
+| `coreclaw-gmaps-reviews-monitor.json` | CoreClaw口碑运营 / Reputation Ops | Slack/Notion/Sheets-ready reputation workflow |
+| `coreclaw-google-maps-leads-complete-global.json` | CoreClaw全球拓客 / Global Prospecting | Global local-business prospecting |
+| `coreclaw-amazon-product-intelligence.json` | CoreClaw亚马逊情报 / Amazon Intel | Amazon product, pricing, seller, and competitor intelligence |
+| `coreclaw-instagram-profile-intelligence.json` | CoreClaw小红书式账号情报 / Instagram Intel | Instagram creator, brand, and partnership intelligence |
 
-Recommended first test:
+## What Is Included
 
-```text
-keyword = coffee shop
-base_location = New York, USA
-max_results = 3
-fetch_reviews = false
-fetch_social_info = false
-wait_seconds = 10
-```
+- CoreClaw official node for scraper run, status polling, and result retrieval.
+- Standard n8n nodes for practical automation: `HTTP Request`, `Code`, `Wait`, `If`, `Switch`, `Split In Batches`, `Remove Duplicates`, `Aggregate`, `Markdown`, and `No Operation` routing placeholders.
+- AI analysis through an HTTP chat-completion endpoint. Public workflow JSON uses `YOUR_LLM_API_KEY`; configure your own key before running AI nodes.
+- Destination payload preparation for Google Sheets, Airtable, Slack, Notion, Gmail, or CRM systems without requiring those credentials during first import.
+- Bilingual, concise local workflow names for a clean n8n workflow list.
 
-## Network Notes
+## Core Usage Pattern
 
-The workflow does not include API keys, credential IDs, local file paths, proxy settings, or historical run IDs.
+1. Import a JSON workflow into n8n.
+2. Select a CoreClaw API credential on each CoreClaw node.
+3. Configure `Input Config / 输入配置`.
+4. Run manually and inspect `Success Summary / 成功摘要`.
+5. Connect real SaaS nodes after payload fields are confirmed.
+6. Activate scheduled workflows only after a manual run succeeds.
 
-Overseas users normally should not need a proxy. Users running n8n from mainland China may need to configure outbound proxy environment variables on the n8n server process, but proxy addresses should not be saved inside the shared workflow JSON.
+## Commercial Scenarios
 
-## 中文说明
+- **Local lead generation**: Find businesses by keyword and city, score leads, and create CRM-ready payloads.
+- **Email enrichment**: Fetch websites, extract emails, and prepare outreach data.
+- **B2B sales operations**: Use AI to identify persona, pain point, pitch, risk, and next step.
+- **Reputation monitoring**: Track reviews and prepare Slack/Notion/Sheets alerts.
+- **Amazon product intelligence**: Monitor product search results, seller data, rating, review count, and opportunities.
+- **Instagram creator intelligence**: Analyze profiles for brand partnership, influencer discovery, and account monitoring.
 
-中文使用说明见 [README.zh-CN.md](README.zh-CN.md).
+## Security Notes
+
+- Do not commit private CoreClaw API keys or third-party LLM keys.
+- Public JSON files intentionally use placeholders for LLM credentials.
+- Move production keys into n8n credentials or environment variables.
+- Keep small limits during testing to control cost and runtime.
+
+## Validation
+
+The included workflows were generated from live CoreClaw API schemas. Google Maps, Amazon product, and Instagram profile scrapers were smoke-tested with real CoreClaw runs before publication preparation.

@@ -1,80 +1,57 @@
-# CoreClaw Google Maps Leads n8n 工作流
+﻿# CoreClaw n8n 商业工作流套件
 
-这是一个完整的 n8n 工作流，用于运行 CoreClaw **Google Map Details By Keyword** 脚本，并导出 Google Maps 商家线索数据。
+本仓库包含一组围绕 CoreClaw 官方 n8n 节点打造的商业级工作流。整体设计参考成熟的 Apify 自动化模板，但数据抓取和任务运行以 CoreClaw 为核心。
 
-## 文件
+## 工作流列表
 
-| 文件 | 用途 |
-| --- | --- |
-| `coreclaw-google-maps-leads-complete-global.json` | 完整 n8n 工作流：搜索脚本、读取实时脚本详情、生成 Campaign Config、启动运行、实时轮询、获取结果、导出 CSV/JSON、获取日志 |
-
-原始导入地址：
-
-```text
-https://raw.githubusercontent.com/Core-Claw/coreclaw-n8n-workflows-google-maps/main/coreclaw-google-maps-leads-complete-global.json
-```
-
-## 工作流做了什么
-
-这个工作流会：
-
-1. 在 CoreClaw Store 搜索 Google Maps keyword 脚本。
-2. 自动选择 **Google Map Details By Keyword**。
-3. 每次运行前读取实时脚本详情。
-4. 使用 CoreClaw 返回的当前 `version`，不手写版本号。
-5. 根据实时 schema 和用户输入自动生成 `customParams`。
-6. 复用脚本详情里的 system 默认参数。
-7. 启动 CoreClaw run。
-8. 轮询到 CoreClaw 返回终态状态。
-9. 获取结果预览，导出 CSV/JSON，并获取日志。
-
-## 使用要求
-
-- 自托管 n8n。
-- 已安装 `n8n-nodes-coreclaw` 社区节点。
-- 已在 n8n 中创建 CoreClaw API credential。
-
-n8n Cloud 可能不允许未验证的社区节点。如果无法使用 CoreClaw 节点，请使用自托管 n8n。
-
-## 导入和运行
-
-1. 打开 n8n。
-2. 导入 `coreclaw-google-maps-leads-complete-global.json`，或使用上面的原始导入地址。
-3. 在每个 CoreClaw 节点上选择你自己的 CoreClaw credential。
-4. 打开 **Lead Search Input** 节点。
-5. 修改需要的字段。
-6. 执行工作流。
-
-## 用户需要填写的字段
-
-通常只需要修改 **Lead Search Input** 节点：
-
-| 字段 | 含义 | 示例 |
+| 文件 | 本地 n8n 名称 | 使用场景 |
 | --- | --- | --- |
-| `keyword` | Google Maps 搜索关键词 | `coffee shop` |
-| `base_location` | 搜索地点 | `New York, USA` |
-| `max_results` | 请求的最大线索数量 | `3` |
-| `fetch_reviews` | 是否抓取评论数据 | `false` |
-| `fetch_social_info` | 是否抓取网站和社交主页信息 | `false` |
-| `wait_seconds` | 每次状态轮询之间的等待秒数 | `10` |
+| `coreclaw-gmaps-leads-simple.json` | CoreClaw地图线索 / Maps Leads | 本地商家线索抓取 |
+| `coreclaw-gmaps-leads-email-extraction-simple.json` | CoreClaw地图邮箱 / Maps Email | 网站邮箱提取和线索补全 |
+| `coreclaw-gmaps-b2b-enrichment-simple.json` | CoreClaw B2B增强 / B2B Enrich | AI 辅助 B2B 线索增强 |
+| `coreclaw-gmaps-reviews-monitor-simple.json` | CoreClaw评论监控 / Reviews Monitor | 轻量级口碑监控 |
+| `coreclaw-gmaps-to-sheets.json` | CoreClaw表格线索 / Sheets Leads | Google Sheets 线索运营载荷 |
+| `coreclaw-gmaps-leads-email-extraction.json` | CoreClaw外联线索 / Email Outreach | AI 话术和外联载荷 |
+| `coreclaw-gmaps-airtable-email.json` | CoreClaw Airtable管道 / Airtable Pipeline | Airtable 或 CRM 管道载荷 |
+| `coreclaw-gmaps-leads-complete-enhanced.json` | CoreClaw完整线索运营 / Lead Ops | 多目标系统线索运营 |
+| `coreclaw-gmaps-reviews-monitor.json` | CoreClaw口碑运营 / Reputation Ops | Slack、Notion、Sheets 口碑运营载荷 |
+| `coreclaw-google-maps-leads-complete-global.json` | CoreClaw全球拓客 / Global Prospecting | 全球本地商家拓客 |
+| `coreclaw-amazon-product-intelligence.json` | CoreClaw亚马逊情报 / Amazon Intel | 亚马逊商品、价格、卖家和竞品情报 |
+| `coreclaw-instagram-profile-intelligence.json` | CoreClaw小红书式账号情报 / Instagram Intel | Instagram 达人、品牌账号和合作机会分析 |
 
-建议首次测试：
+## 包含能力
 
-```text
-keyword = coffee shop
-base_location = New York, USA
-max_results = 3
-fetch_reviews = false
-fetch_social_info = false
-wait_seconds = 10
-```
+- 使用 CoreClaw 官方节点完成 scraper 启动、状态轮询和结果获取。
+- 使用标准 n8n 节点完善自动化：`HTTP Request`、`Code`、`Wait`、`If`、`Switch`、`Split In Batches`、`Remove Duplicates`、`Aggregate`、`Markdown`、`No Operation`。
+- 通过 HTTP 调用大模型做商业分析。公开 JSON 使用 `YOUR_LLM_API_KEY` 占位，运行前请配置自己的密钥。
+- 生成 Google Sheets、Airtable、Slack、Notion、Gmail 或 CRM 可用的数据载荷，初次导入不需要这些第三方凭证。
+- 本地 n8n 工作流使用中英双语简洁名称，保持列表清晰。
 
-## 网络说明
+## 基本用法
 
-这个公开工作流不包含 API key、credential ID、本地路径、代理地址或历史 run ID。
+1. 在 n8n 中导入 JSON 工作流。
+2. 在每个 CoreClaw 节点选择 CoreClaw API 凭证。
+3. 修改 `Input Config / 输入配置`。
+4. 手动运行并检查 `Success Summary / 成功摘要`。
+5. 确认载荷字段后，再接入真实 SaaS 节点。
+6. 定时工作流必须先手动验证成功后再激活。
 
-海外用户通常不需要代理。如果 n8n 运行在中国内地，本机或服务器可能需要为 n8n 进程配置出站代理环境变量，但不要把代理地址写进公开共享的 workflow JSON。
+## 商业场景
 
-## English
+- **本地线索生成**：按关键词和城市查找商家，评分并生成 CRM 可用载荷。
+- **邮箱补全**：抓取官网，提取邮箱，准备外联数据。
+- **B2B 销售运营**：用 AI 判断客户画像、痛点、销售话术、风险和下一步动作。
+- **口碑监控**：跟踪评论并准备 Slack、Notion、Sheets 告警载荷。
+- **亚马逊商品情报**：监控搜索结果、卖家、评分、评论数和商品机会。
+- **Instagram 账号情报**：分析达人、品牌账号、合作机会和账号监控信号。
 
-English instructions are available in [README.md](README.md).
+## 安全说明
+
+- 不要提交私有 CoreClaw API Key 或第三方大模型 Key。
+- 公开 JSON 文件使用大模型凭证占位符。
+- 生产环境建议把密钥迁移到 n8n 凭证或环境变量。
+- 测试阶段保持较小的结果数量，控制成本和运行时间。
+
+## 验证说明
+
+这些工作流基于真实 CoreClaw API schema 生成。Google Maps、Amazon 商品、Instagram Profile scraper 在发布准备前都已用真实 CoreClaw 运行做过小样本烟测。
