@@ -1,57 +1,304 @@
-﻿# CoreClaw n8n Commercial Workflow Pack
+# CoreClaw n8n Commercial Workflow Pack
 
-This repository contains business-ready n8n workflows built around the official CoreClaw n8n node. The pack is inspired by mature Apify workflow templates, but CoreClaw is the primary scraping and data-extraction platform.
+This repository provides mature CoreClaw-first n8n workflows for lead generation, ecommerce intelligence, social account intelligence, reputation monitoring, and sales operations. Each workflow contains bilingual node names and detailed sticky notes in English and Chinese.
+
+## Setup
+
+1. Import the JSON workflow into n8n.
+2. Select your CoreClaw API credential on each CoreClaw node.
+3. If the workflow uses AI, replace `YOUR_LLM_API_KEY` in HTTP Request nodes or move it into a credential.
+4. Edit `Input Config / ????`.
+5. Run manually and inspect `Success Summary / ????`.
+6. Connect real Google Sheets, Airtable, Slack, Notion, Gmail, or CRM nodes to the prepared payload nodes.
+
+## Workflow Map
+
+```mermaid
+mindmap
+  root((CoreClaw n8n Pack))
+    Google Maps
+      Leads
+      Email Enrichment
+      B2B Enrichment
+      Reputation
+      Global Prospecting
+    Amazon
+      Product Intelligence
+      Competitor Monitoring
+    Instagram
+      Profile Intelligence
+      Partnership Discovery
+    Destinations
+      Sheets
+      Airtable
+      Slack
+      Notion
+      CRM
+```
 
 ## Workflows
 
-| File | Local n8n Name | Use Case |
-| --- | --- | --- |
-| `coreclaw-gmaps-leads-simple.json` | CoreClaw地图线索 / Maps Leads | Local business lead scraping |
-| `coreclaw-gmaps-leads-email-extraction-simple.json` | CoreClaw地图邮箱 / Maps Email | Website email enrichment |
-| `coreclaw-gmaps-b2b-enrichment-simple.json` | CoreClaw B2B增强 / B2B Enrich | AI-assisted B2B lead enrichment |
-| `coreclaw-gmaps-reviews-monitor-simple.json` | CoreClaw评论监控 / Reviews Monitor | Lightweight reputation monitoring |
-| `coreclaw-gmaps-to-sheets.json` | CoreClaw表格线索 / Sheets Leads | Google Sheets-ready lead operations |
-| `coreclaw-gmaps-leads-email-extraction.json` | CoreClaw外联线索 / Email Outreach | AI pitch and outreach payloads |
-| `coreclaw-gmaps-airtable-email.json` | CoreClaw Airtable管道 / Airtable Pipeline | Airtable or CRM pipeline payloads |
-| `coreclaw-gmaps-leads-complete-enhanced.json` | CoreClaw完整线索运营 / Lead Ops | Multi-destination lead operations |
-| `coreclaw-gmaps-reviews-monitor.json` | CoreClaw口碑运营 / Reputation Ops | Slack/Notion/Sheets-ready reputation workflow |
-| `coreclaw-google-maps-leads-complete-global.json` | CoreClaw全球拓客 / Global Prospecting | Global local-business prospecting |
-| `coreclaw-amazon-product-intelligence.json` | CoreClaw亚马逊情报 / Amazon Intel | Amazon product, pricing, seller, and competitor intelligence |
-| `coreclaw-instagram-profile-intelligence.json` | CoreClaw小红书式账号情报 / Instagram Intel | Instagram creator, brand, and partnership intelligence |
+### CoreClaw???? / Maps Leads
 
-## What Is Included
+- **File:** `coreclaw-gmaps-leads-simple.json`
+- **Use case:** Local business leads
+- **Parameter example:** `keyword=dentist; base_location=Austin, Texas, USA; max_results=3`
+- **How it helps:** Converts raw CoreClaw data into scored, deduplicated, business-ready records with reporting and downstream payloads.
 
-- CoreClaw official node for scraper run, status polling, and result retrieval.
-- Standard n8n nodes for practical automation: `HTTP Request`, `Code`, `Wait`, `If`, `Switch`, `Split In Batches`, `Remove Duplicates`, `Aggregate`, `Markdown`, and `No Operation` routing placeholders.
-- AI analysis through an HTTP chat-completion endpoint. Public workflow JSON uses `YOUR_LLM_API_KEY`; configure your own key before running AI nodes.
-- Destination payload preparation for Google Sheets, Airtable, Slack, Notion, Gmail, or CRM systems without requiring those credentials during first import.
-- Bilingual, concise local workflow names for a clean n8n workflow list.
+```mermaid
+flowchart LR
+  A["Trigger / ??"] --> B["Input Config / ????"]
+  B --> C["CoreClaw Run / CoreClaw??"]
+  C --> D["Poll Status / ????"]
+  D --> E{"Succeeded? / ????"}
+  E -->|"Yes / ?"| F["Get Results / ????"]
+  E -->|"No / ?"| X["Failure Summary / ????"]
+  F --> G["Normalize + Deduplicate / ???+??"]
+  G --> H["AI or Enrichment / AI???"]
+  H --> I["Payloads + Report / ??+??"]
+  I --> J["Success Summary / ????"]
+```
 
-## Core Usage Pattern
+### CoreClaw???? / Maps Email
 
-1. Import a JSON workflow into n8n.
-2. Select a CoreClaw API credential on each CoreClaw node.
-3. Configure `Input Config / 输入配置`.
-4. Run manually and inspect `Success Summary / 成功摘要`.
-5. Connect real SaaS nodes after payload fields are confirmed.
-6. Activate scheduled workflows only after a manual run succeeds.
+- **File:** `coreclaw-gmaps-leads-email-extraction-simple.json`
+- **Use case:** Lead email discovery
+- **Parameter example:** `keyword=dentist; base_location=Austin, Texas, USA; max_results=3`
+- **How it helps:** Converts raw CoreClaw data into scored, deduplicated, business-ready records with reporting and downstream payloads.
 
-## Commercial Scenarios
+```mermaid
+flowchart LR
+  A["Trigger / ??"] --> B["Input Config / ????"]
+  B --> C["CoreClaw Run / CoreClaw??"]
+  C --> D["Poll Status / ????"]
+  D --> E{"Succeeded? / ????"}
+  E -->|"Yes / ?"| F["Get Results / ????"]
+  E -->|"No / ?"| X["Failure Summary / ????"]
+  F --> G["Normalize + Deduplicate / ???+??"]
+  G --> H["AI or Enrichment / AI???"]
+  H --> I["Payloads + Report / ??+??"]
+  I --> J["Success Summary / ????"]
+```
 
-- **Local lead generation**: Find businesses by keyword and city, score leads, and create CRM-ready payloads.
-- **Email enrichment**: Fetch websites, extract emails, and prepare outreach data.
-- **B2B sales operations**: Use AI to identify persona, pain point, pitch, risk, and next step.
-- **Reputation monitoring**: Track reviews and prepare Slack/Notion/Sheets alerts.
-- **Amazon product intelligence**: Monitor product search results, seller data, rating, review count, and opportunities.
-- **Instagram creator intelligence**: Analyze profiles for brand partnership, influencer discovery, and account monitoring.
+### CoreClaw B2B?? / B2B Enrich
 
-## Security Notes
+- **File:** `coreclaw-gmaps-b2b-enrichment-simple.json`
+- **Use case:** B2B AI enrichment
+- **Parameter example:** `keyword=dentist; base_location=Austin, Texas, USA; max_results=3`
+- **How it helps:** Converts raw CoreClaw data into scored, deduplicated, business-ready records with reporting and downstream payloads.
 
-- Do not commit private CoreClaw API keys or third-party LLM keys.
-- Public JSON files intentionally use placeholders for LLM credentials.
-- Move production keys into n8n credentials or environment variables.
-- Keep small limits during testing to control cost and runtime.
+```mermaid
+flowchart LR
+  A["Trigger / ??"] --> B["Input Config / ????"]
+  B --> C["CoreClaw Run / CoreClaw??"]
+  C --> D["Poll Status / ????"]
+  D --> E{"Succeeded? / ????"}
+  E -->|"Yes / ?"| F["Get Results / ????"]
+  E -->|"No / ?"| X["Failure Summary / ????"]
+  F --> G["Normalize + Deduplicate / ???+??"]
+  G --> H["AI or Enrichment / AI???"]
+  H --> I["Payloads + Report / ??+??"]
+  I --> J["Success Summary / ????"]
+```
 
-## Validation
+### CoreClaw???? / Reviews Monitor
 
-The included workflows were generated from live CoreClaw API schemas. Google Maps, Amazon product, and Instagram profile scrapers were smoke-tested with real CoreClaw runs before publication preparation.
+- **File:** `coreclaw-gmaps-reviews-monitor-simple.json`
+- **Use case:** Review monitoring
+- **Parameter example:** `keyword=dentist; base_location=Austin, Texas, USA; max_results=2; max_reviews_per_place=3`
+- **How it helps:** Converts raw CoreClaw data into scored, deduplicated, business-ready records with reporting and downstream payloads.
+
+```mermaid
+flowchart LR
+  A["Trigger / ??"] --> B["Input Config / ????"]
+  B --> C["CoreClaw Run / CoreClaw??"]
+  C --> D["Poll Status / ????"]
+  D --> E{"Succeeded? / ????"}
+  E -->|"Yes / ?"| F["Get Results / ????"]
+  E -->|"No / ?"| X["Failure Summary / ????"]
+  F --> G["Normalize + Deduplicate / ???+??"]
+  G --> H["AI or Enrichment / AI???"]
+  H --> I["Payloads + Report / ??+??"]
+  I --> J["Success Summary / ????"]
+```
+
+### CoreClaw???? / Sheets Leads
+
+- **File:** `coreclaw-gmaps-to-sheets.json`
+- **Use case:** Sheets-ready lead ops
+- **Parameter example:** `keyword=dentist; base_location=Austin, Texas, USA; max_results=3`
+- **How it helps:** Converts raw CoreClaw data into scored, deduplicated, business-ready records with reporting and downstream payloads.
+
+```mermaid
+flowchart LR
+  A["Trigger / ??"] --> B["Input Config / ????"]
+  B --> C["CoreClaw Run / CoreClaw??"]
+  C --> D["Poll Status / ????"]
+  D --> E{"Succeeded? / ????"}
+  E -->|"Yes / ?"| F["Get Results / ????"]
+  E -->|"No / ?"| X["Failure Summary / ????"]
+  F --> G["Normalize + Deduplicate / ???+??"]
+  G --> H["AI or Enrichment / AI???"]
+  H --> I["Payloads + Report / ??+??"]
+  I --> J["Success Summary / ????"]
+```
+
+### CoreClaw???? / Email Outreach
+
+- **File:** `coreclaw-gmaps-leads-email-extraction.json`
+- **Use case:** AI outreach pipeline
+- **Parameter example:** `keyword=dentist; base_location=Austin, Texas, USA; fetch_social_info=true`
+- **How it helps:** Converts raw CoreClaw data into scored, deduplicated, business-ready records with reporting and downstream payloads.
+
+```mermaid
+flowchart LR
+  A["Trigger / ??"] --> B["Input Config / ????"]
+  B --> C["CoreClaw Run / CoreClaw??"]
+  C --> D["Poll Status / ????"]
+  D --> E{"Succeeded? / ????"}
+  E -->|"Yes / ?"| F["Get Results / ????"]
+  E -->|"No / ?"| X["Failure Summary / ????"]
+  F --> G["Normalize + Deduplicate / ???+??"]
+  G --> H["AI or Enrichment / AI???"]
+  H --> I["Payloads + Report / ??+??"]
+  I --> J["Success Summary / ????"]
+```
+
+### CoreClaw Airtable?? / Airtable Pipeline
+
+- **File:** `coreclaw-gmaps-airtable-email.json`
+- **Use case:** Airtable CRM pipeline
+- **Parameter example:** `keyword=dentist; base_location=Austin, Texas, USA; max_results=3`
+- **How it helps:** Converts raw CoreClaw data into scored, deduplicated, business-ready records with reporting and downstream payloads.
+
+```mermaid
+flowchart LR
+  A["Trigger / ??"] --> B["Input Config / ????"]
+  B --> C["CoreClaw Run / CoreClaw??"]
+  C --> D["Poll Status / ????"]
+  D --> E{"Succeeded? / ????"}
+  E -->|"Yes / ?"| F["Get Results / ????"]
+  E -->|"No / ?"| X["Failure Summary / ????"]
+  F --> G["Normalize + Deduplicate / ???+??"]
+  G --> H["AI or Enrichment / AI???"]
+  H --> I["Payloads + Report / ??+??"]
+  I --> J["Success Summary / ????"]
+```
+
+### CoreClaw?????? / Lead Ops
+
+- **File:** `coreclaw-gmaps-leads-complete-enhanced.json`
+- **Use case:** Complete lead operations
+- **Parameter example:** `keyword=dentist; base_location=Austin, Texas, USA; max_results=3`
+- **How it helps:** Converts raw CoreClaw data into scored, deduplicated, business-ready records with reporting and downstream payloads.
+
+```mermaid
+flowchart LR
+  A["Trigger / ??"] --> B["Input Config / ????"]
+  B --> C["CoreClaw Run / CoreClaw??"]
+  C --> D["Poll Status / ????"]
+  D --> E{"Succeeded? / ????"}
+  E -->|"Yes / ?"| F["Get Results / ????"]
+  E -->|"No / ?"| X["Failure Summary / ????"]
+  F --> G["Normalize + Deduplicate / ???+??"]
+  G --> H["AI or Enrichment / AI???"]
+  H --> I["Payloads + Report / ??+??"]
+  I --> J["Success Summary / ????"]
+```
+
+### CoreClaw???? / Reputation Ops
+
+- **File:** `coreclaw-gmaps-reviews-monitor.json`
+- **Use case:** Advanced reputation ops
+- **Parameter example:** `keyword=dentist; base_location=Austin, Texas, USA; fetch_reviews=true`
+- **How it helps:** Converts raw CoreClaw data into scored, deduplicated, business-ready records with reporting and downstream payloads.
+
+```mermaid
+flowchart LR
+  A["Trigger / ??"] --> B["Input Config / ????"]
+  B --> C["CoreClaw Run / CoreClaw??"]
+  C --> D["Poll Status / ????"]
+  D --> E{"Succeeded? / ????"}
+  E -->|"Yes / ?"| F["Get Results / ????"]
+  E -->|"No / ?"| X["Failure Summary / ????"]
+  F --> G["Normalize + Deduplicate / ???+??"]
+  G --> H["AI or Enrichment / AI???"]
+  H --> I["Payloads + Report / ??+??"]
+  I --> J["Success Summary / ????"]
+```
+
+### CoreClaw???? / Global Prospecting
+
+- **File:** `coreclaw-google-maps-leads-complete-global.json`
+- **Use case:** Global prospecting
+- **Parameter example:** `keyword=restaurant; base_location=Singapore; max_results=3`
+- **How it helps:** Converts raw CoreClaw data into scored, deduplicated, business-ready records with reporting and downstream payloads.
+
+```mermaid
+flowchart LR
+  A["Trigger / ??"] --> B["Input Config / ????"]
+  B --> C["CoreClaw Run / CoreClaw??"]
+  C --> D["Poll Status / ????"]
+  D --> E{"Succeeded? / ????"}
+  E -->|"Yes / ?"| F["Get Results / ????"]
+  E -->|"No / ?"| X["Failure Summary / ????"]
+  F --> G["Normalize + Deduplicate / ???+??"]
+  G --> H["AI or Enrichment / AI???"]
+  H --> I["Payloads + Report / ??+??"]
+  I --> J["Success Summary / ????"]
+```
+
+### CoreClaw????? / Amazon Intel
+
+- **File:** `coreclaw-amazon-product-intelligence.json`
+- **Use case:** Amazon product intelligence
+- **Parameter example:** `domain=https://www.amazon.com; keyword=coffee grinder; limit=3`
+- **How it helps:** Converts raw CoreClaw data into scored, deduplicated, business-ready records with reporting and downstream payloads.
+
+```mermaid
+flowchart LR
+  A["Trigger / ??"] --> B["Input Config / ????"]
+  B --> C["CoreClaw Run / CoreClaw??"]
+  C --> D["Poll Status / ????"]
+  D --> E{"Succeeded? / ????"}
+  E -->|"Yes / ?"| F["Get Results / ????"]
+  E -->|"No / ?"| X["Failure Summary / ????"]
+  F --> G["Normalize + Deduplicate / ???+??"]
+  G --> H["AI or Enrichment / AI???"]
+  H --> I["Payloads + Report / ??+??"]
+  I --> J["Success Summary / ????"]
+```
+
+### CoreClaw Instagram???? / Instagram Intel
+
+- **File:** `coreclaw-instagram-profile-intelligence.json`
+- **Use case:** Instagram profile intelligence
+- **Parameter example:** `username=instagram; limit=1`
+- **How it helps:** Converts raw CoreClaw data into scored, deduplicated, business-ready records with reporting and downstream payloads.
+
+```mermaid
+flowchart LR
+  A["Trigger / ??"] --> B["Input Config / ????"]
+  B --> C["CoreClaw Run / CoreClaw??"]
+  C --> D["Poll Status / ????"]
+  D --> E{"Succeeded? / ????"}
+  E -->|"Yes / ?"| F["Get Results / ????"]
+  E -->|"No / ?"| X["Failure Summary / ????"]
+  F --> G["Normalize + Deduplicate / ???+??"]
+  G --> H["AI or Enrichment / AI???"]
+  H --> I["Payloads + Report / ??+??"]
+  I --> J["Success Summary / ????"]
+```
+
+## Parameter Guide
+
+- `keyword`: Business category, product keyword, or search topic. Example: `dentist`, `restaurant`, `coffee grinder`.
+- `base_location`: Location for Google Maps workflows. Example: `Austin, Texas, USA`.
+- `max_results` / `limit`: Keep low during testing, then increase gradually.
+- `wait_seconds`: Polling interval. Use larger values for bigger jobs.
+- `domain`: Amazon marketplace domain, e.g. `https://www.amazon.com`.
+- `username`: Instagram username without @.
+
+## Security
+
+No public workflow JSON contains private CoreClaw or LLM keys. Use n8n credentials or environment variables for production.

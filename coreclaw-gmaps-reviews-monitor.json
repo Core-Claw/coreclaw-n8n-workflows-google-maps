@@ -2,23 +2,68 @@
   "name": "CoreClaw口碑运营 / Reputation Ops",
   "nodes": [
     {
-      "id": "note-workflow-overview",
-      "name": "Workflow Overview",
+      "id": "note-overview",
+      "name": "Overview / ??",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         -1700,
-        -480
+        -520
       ],
       "parameters": {
-        "content": "## CoreClaw口碑运营 / Reputation Ops\n\nA mature CoreClaw-first n8n workflow inspired by the Apify templates. CoreClaw performs the official scrape. Additional n8n nodes provide batching, AI analysis, website enrichment, routing, payload preparation, reporting, and verification-friendly summaries. External SaaS credentials are represented as payload-preparation nodes so the workflow runs locally before you connect Google Sheets, Airtable, Slack, Notion, Gmail, or CRM credentials.",
-        "width": 820,
-        "height": 420
+        "content": "## CoreClaw口碑运营 / Reputation Ops\n\n**Purpose (EN):** Advanced reputation operations.\n\n**???????** ???????\n\nThis workflow uses the official CoreClaw node as the scraping source and combines standard n8n nodes for polling, deduplication, AI enrichment, routing, reporting, and destination payload preparation.\n\n????? CoreClaw ????????????? n8n ????????????AI??????????????????",
+        "width": 760,
+        "height": 380
+      }
+    },
+    {
+      "id": "note-parameters",
+      "name": "Parameters / ??",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        -520
+      ],
+      "parameters": {
+        "content": "## Parameters / ????\n\nEdit **Input Config / ????** before running.\n\n**Example / ???**\n`keyword=dentist, base_location=Austin, Texas, USA, fetch_reviews=true`\n\n**Tips / ???**\n- Start with low limits for testing.\n- Increase wait_seconds for larger jobs.\n- Select your CoreClaw credential on each CoreClaw node after import.\n- ?????????????\n- ???????? wait_seconds?\n- ????? CoreClaw ?????????",
+        "width": 700,
+        "height": 380
+      }
+    },
+    {
+      "id": "note-flow",
+      "name": "Flow / ??",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1700,
+        -120
+      ],
+      "parameters": {
+        "content": "## Flow / ??\n\n1. Trigger / ??\n2. Input Config / ????\n3. Start CoreClaw Run / ?? CoreClaw\n4. Wait + Poll / ?????\n5. Get Results / ????\n6. Normalize + Deduplicate / ??????\n7. AI or Enrichment / AI?????\n8. Prepare Payloads + Report / ?????????\n\nUse **Success Summary / ????** to inspect final output.\n?? **Success Summary / ????** ???????",
+        "width": 760,
+        "height": 360
+      }
+    },
+    {
+      "id": "note-output",
+      "name": "Outputs / ??",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        -120
+      ],
+      "parameters": {
+        "content": "## Outputs & Integrations / ?????\n\n**Output (EN):** Slack/Notion/Sheets payloads for reputation follow-up.\n\n**???????** ???????????????????????\n\nRecommended next integrations:\n- Google Sheets / Google ??\n- Airtable or CRM / Airtable ? CRM\n- Slack alerts / Slack ??\n- Notion database / Notion ???\n- Gmail or email outreach / Gmail ?????",
+        "width": 700,
+        "height": 360
       }
     },
     {
       "id": "schedule-trigger",
-      "name": "Every 24 Hours",
+      "name": "Every 24 Hours / ?24??",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
       "position": [
@@ -38,7 +83,7 @@
     },
     {
       "id": "input-config",
-      "name": "Input Config",
+      "name": "Input Config / ????",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
@@ -109,7 +154,7 @@
     },
     {
       "id": "start-coreclaw-run",
-      "name": "Start CoreClaw Run",
+      "name": "Start CoreClaw Run / ??CoreClaw",
       "type": "n8n-nodes-coreclaw.coreClaw",
       "typeVersion": 1,
       "position": [
@@ -135,7 +180,7 @@
     },
     {
       "id": "wait-before-next-poll",
-      "name": "Wait Before Next Poll",
+      "name": "Wait Before Poll / ????",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
@@ -150,7 +195,7 @@
     },
     {
       "id": "get-run-status",
-      "name": "Get Run Status",
+      "name": "Get Run Status / ????",
       "type": "n8n-nodes-coreclaw.coreClaw",
       "typeVersion": 1,
       "position": [
@@ -160,7 +205,7 @@
       "parameters": {
         "resource": "run",
         "operation": "get",
-        "runSlug": "={{ $('Start CoreClaw Run').item.json.run_slug }}"
+        "runSlug": "={{ $('Start CoreClaw Run / ??CoreClaw').item.json.run_slug }}"
       },
       "retryOnFail": true,
       "maxTries": 3,
@@ -171,7 +216,7 @@
     },
     {
       "id": "if-run-terminal",
-      "name": "If Run Terminal",
+      "name": "If Terminal / ????",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
@@ -204,7 +249,7 @@
     },
     {
       "id": "if-run-succeeded",
-      "name": "If Run Succeeded",
+      "name": "If Success / ????",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
@@ -237,7 +282,7 @@
     },
     {
       "id": "get-run-results",
-      "name": "Get Run Results",
+      "name": "Get Run Results / ????",
       "type": "n8n-nodes-coreclaw.coreClaw",
       "typeVersion": 1,
       "position": [
@@ -247,9 +292,9 @@
       "parameters": {
         "resource": "run",
         "operation": "getResults",
-        "runSlug": "={{ $('Start CoreClaw Run').item.json.run_slug }}",
+        "runSlug": "={{ $('Start CoreClaw Run / ??CoreClaw').item.json.run_slug }}",
         "returnAll": false,
-        "limit": "={{ Number($items(\"Input Config\")?.[0]?.json?.max_results || 10) }}"
+        "limit": "={{ Number($items(\"Input Config / ????\")?.[0]?.json?.max_results || 10) }}"
       },
       "retryOnFail": true,
       "maxTries": 3,
@@ -259,7 +304,7 @@
     },
     {
       "id": "normalize-business-leads",
-      "name": "Normalize Business Leads",
+      "name": "Normalize Leads / ?????",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -268,12 +313,12 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const input = $items('Input Config')?.[0]?.json ?? {};\nconst rows = $input.all().map(item => item.json);\nfunction cleanUrl(value) { return String(value || '').split('?')[0].replace(//$/, ''); }\nfunction key(row) { return String(row.cid || row.data_id || row.website || row.title || '').toLowerCase().trim(); }\nreturn rows.map((row, index) => {\n  const website = cleanUrl(row.website);\n  const emails = [row.email_1, row.email_2, row.email_3, row.email_4, row.all_emails].filter(Boolean).join(', ');\n  const rating = Number(row.total_score || row.rating || 0);\n  const reviewCount = Number(row.reviews_count || row.review_count || 0);\n  let leadScore = 35;\n  if (website) leadScore += 15;\n  if (emails) leadScore += 25;\n  if (row.phone) leadScore += 10;\n  if (rating >= 4.5) leadScore += 10;\n  if (reviewCount >= 100) leadScore += 10;\n  if (rating > 0 && rating < 4) leadScore -= 15;\n  leadScore = Math.max(0, Math.min(100, leadScore));\n  const leadPriority = leadScore >= 80 ? 'hot' : leadScore >= 60 ? 'warm' : 'nurture';\n  return { json: {\n    workflow_kind: 'reputation_advanced', lead_key: key(row), index: index + 1,\n    source_keyword: row.source_keyword || input.keyword || '', source_location: row.source_location || input.base_location || '',\n    title: row.title || '', category: row.primary_category || row.all_categories || '', all_categories: row.all_categories || '',\n    address: row.address || '', city: row.city || '', state: row.state || '', country: row.country || '', postal_code: row.postal_code || '',\n    phone: row.phone || '', website, email: emails, rating, review_count: reviewCount, google_maps_url: row.url || '',\n    lead_score: leadScore, lead_priority: leadPriority, crm_stage: leadPriority === 'hot' ? 'Qualified' : 'New',\n    recommended_action: leadPriority === 'hot' ? 'Call today and send personalized email.' : leadPriority === 'warm' ? 'Send email and call within 48 hours.' : 'Add to nurture and enrich later.',\n    company_summary: [row.title, row.primary_category, row.address, row.phone ? 'Phone: ' + row.phone : '', website ? 'Website: ' + website : ''].filter(Boolean).join(' | '),\n    scraped_at: row.scraped_at || new Date().toISOString(), raw: row\n  }};\n});"
+        "jsCode": "const input = $items('Input Config / ????')?.[0]?.json ?? {};\nconst rows = $input.all().map(item => item.json);\nfunction cleanUrl(value) { return String(value || '').split('?')[0].replace(//$/, ''); }\nfunction key(row) { return String(row.cid || row.data_id || row.website || row.title || '').toLowerCase().trim(); }\nreturn rows.map((row, index) => {\n  const website = cleanUrl(row.website);\n  const emails = [row.email_1, row.email_2, row.email_3, row.email_4, row.all_emails].filter(Boolean).join(', ');\n  const rating = Number(row.total_score || row.rating || 0);\n  const reviewCount = Number(row.reviews_count || row.review_count || 0);\n  let leadScore = 35;\n  if (website) leadScore += 15;\n  if (emails) leadScore += 25;\n  if (row.phone) leadScore += 10;\n  if (rating >= 4.5) leadScore += 10;\n  if (reviewCount >= 100) leadScore += 10;\n  if (rating > 0 && rating < 4) leadScore -= 15;\n  leadScore = Math.max(0, Math.min(100, leadScore));\n  const leadPriority = leadScore >= 80 ? 'hot' : leadScore >= 60 ? 'warm' : 'nurture';\n  return { json: {\n    workflow_kind: 'reputation_advanced', lead_key: key(row), index: index + 1,\n    source_keyword: row.source_keyword || input.keyword || '', source_location: row.source_location || input.base_location || '',\n    title: row.title || '', category: row.primary_category || row.all_categories || '', all_categories: row.all_categories || '',\n    address: row.address || '', city: row.city || '', state: row.state || '', country: row.country || '', postal_code: row.postal_code || '',\n    phone: row.phone || '', website, email: emails, rating, review_count: reviewCount, google_maps_url: row.url || '',\n    lead_score: leadScore, lead_priority: leadPriority, crm_stage: leadPriority === 'hot' ? 'Qualified' : 'New',\n    recommended_action: leadPriority === 'hot' ? 'Call today and send personalized email.' : leadPriority === 'warm' ? 'Send email and call within 48 hours.' : 'Add to nurture and enrich later.',\n    company_summary: [row.title, row.primary_category, row.address, row.phone ? 'Phone: ' + row.phone : '', website ? 'Website: ' + website : ''].filter(Boolean).join(' | '),\n    scraped_at: row.scraped_at || new Date().toISOString(), raw: row\n  }};\n});"
       }
     },
     {
       "id": "remove-duplicates",
-      "name": "Remove Duplicates",
+      "name": "Remove Duplicates / ??",
       "type": "n8n-nodes-base.removeDuplicates",
       "typeVersion": 2,
       "position": [
@@ -288,7 +333,7 @@
     },
     {
       "id": "loop-over-leads",
-      "name": "Loop Over Leads",
+      "name": "Loop Leads / ????",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
@@ -302,7 +347,7 @@
     },
     {
       "id": "ai-business-analysis",
-      "name": "AI Business Analysis (HTTP)",
+      "name": "AI Business Analysis / AI????",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -336,7 +381,7 @@
     },
     {
       "id": "parse-ai-output",
-      "name": "Parse AI Output",
+      "name": "Parse AI Output / ??AI??",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -345,12 +390,12 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "return $input.all().map(item => {\n  const json = item.json;\n  const content = json.choices?.[0]?.message?.content || '';\n  const cleaned = content.replace(/^s*```jsons*/i, '').replace(/```s*$/,'').trim();\n  let ai = {};\n  try { ai = JSON.parse(cleaned); } catch (error) { ai = { raw_ai_output: content }; }\n  return { json: { ...($items('Loop Over Leads')?.[0]?.json || {}), ai_persona: ai.persona || '', ai_pain_point: ai.pain_point || '', ai_pitch: ai.pitch || '', ai_next_step: ai.next_step || '', ai_risk: ai.risk || '', ai_raw: ai } };\n});"
+        "jsCode": "return $input.all().map(item => {\n  const json = item.json;\n  const content = json.choices?.[0]?.message?.content || '';\n  const cleaned = content.replace(/^s*```jsons*/i, '').replace(/```s*$/,'').trim();\n  let ai = {};\n  try { ai = JSON.parse(cleaned); } catch (error) { ai = { raw_ai_output: content }; }\n  return { json: { ...($items('Loop Leads / ????')?.[0]?.json || {}), ai_persona: ai.persona || '', ai_pain_point: ai.pain_point || '', ai_pitch: ai.pitch || '', ai_next_step: ai.next_step || '', ai_risk: ai.risk || '', ai_raw: ai } };\n});"
       }
     },
     {
       "id": "prepare-google-sheets-rows",
-      "name": "Prepare Google Sheets Rows",
+      "name": "Prepare Sheets Rows / ?????",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -364,7 +409,7 @@
     },
     {
       "id": "prepare-slack-alerts",
-      "name": "Prepare Slack Alerts",
+      "name": "Prepare Slack Alerts / ??Slack??",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -378,7 +423,7 @@
     },
     {
       "id": "prepare-notion-pages",
-      "name": "Prepare Notion Pages",
+      "name": "Prepare Notion Pages / ??Notion??",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -392,7 +437,7 @@
     },
     {
       "id": "aggregate-campaign",
-      "name": "Aggregate Campaign",
+      "name": "Aggregate Campaign / ????",
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
       "position": [
@@ -407,7 +452,7 @@
     },
     {
       "id": "markdown-report",
-      "name": "Markdown Report",
+      "name": "Markdown Report / Markdown??",
       "type": "n8n-nodes-base.markdown",
       "typeVersion": 1,
       "position": [
@@ -421,7 +466,7 @@
     },
     {
       "id": "build-success-summary",
-      "name": "Build Success Summary",
+      "name": "Success Summary / ????",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -430,12 +475,12 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const status = $items('Get Run Status')?.[0]?.json ?? {};\nconst input = $items('Input Config')?.[0]?.json ?? {};\nconst rows = $input.all().map(i => i.json);\nreturn [{ json: { outcome: 'success', workflow_kind: 'reputation_advanced', run_slug: $items('Start CoreClaw Run')?.[0]?.json?.run_slug || '', run_status: status.status, coreclaw_result_count: status.results, returned_items: rows.length, hot_leads: rows.filter(r => r.lead_priority === 'hot').length, warm_leads: rows.filter(r => r.lead_priority === 'warm').length, keyword: input.keyword, base_location: input.base_location, business_value: 'CoreClaw plus n8n enrichment pipeline with AI, routing, destination payloads, and verification summary.', sample_results: rows.slice(0, 3), verified_at: new Date().toISOString() }}];"
+        "jsCode": "const status = $items('Get Run Status / ????')?.[0]?.json ?? {};\nconst input = $items('Input Config / ????')?.[0]?.json ?? {};\nconst rows = $input.all().map(i => i.json);\nreturn [{ json: { outcome: 'success', workflow_kind: 'reputation_advanced', run_slug: $items('Start CoreClaw Run / ??CoreClaw')?.[0]?.json?.run_slug || '', run_status: status.status, coreclaw_result_count: status.results, returned_items: rows.length, hot_leads: rows.filter(r => r.lead_priority === 'hot').length, warm_leads: rows.filter(r => r.lead_priority === 'warm').length, keyword: input.keyword, base_location: input.base_location, business_value: 'CoreClaw plus n8n enrichment pipeline with AI, routing, destination payloads, and verification summary.', sample_results: rows.slice(0, 3), verified_at: new Date().toISOString() }}];"
       }
     },
     {
       "id": "build-failure-summary",
-      "name": "Build Failure Summary",
+      "name": "Failure Summary / ????",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -444,16 +489,16 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const status = $items('Get Run Status')?.[0]?.json ?? {};\nreturn [{ json: { outcome: 'failure', workflow_kind: 'reputation_advanced', run_slug: $items('Start CoreClaw Run')?.[0]?.json?.run_slug || '', run_status: status.status, run_error_message: status.err_msg || '', verified_at: new Date().toISOString() }}];"
+        "jsCode": "const status = $items('Get Run Status / ????')?.[0]?.json ?? {};\nreturn [{ json: { outcome: 'failure', workflow_kind: 'reputation_advanced', run_slug: $items('Start CoreClaw Run / ??CoreClaw')?.[0]?.json?.run_slug || '', run_status: status.status, run_error_message: status.err_msg || '', verified_at: new Date().toISOString() }}];"
       }
     }
   ],
   "connections": {
-    "Every 24 Hours": {
+    "Every 24 Hours / ?24??": {
       "main": [
         [
           {
-            "node": "Input Config",
+            "node": "Input Config / ????",
             "type": "main",
             "index": 0
           }
@@ -461,11 +506,11 @@
         []
       ]
     },
-    "Input Config": {
+    "Input Config / ????": {
       "main": [
         [
           {
-            "node": "Start CoreClaw Run",
+            "node": "Start CoreClaw Run / ??CoreClaw",
             "type": "main",
             "index": 0
           }
@@ -473,11 +518,11 @@
         []
       ]
     },
-    "Start CoreClaw Run": {
+    "Start CoreClaw Run / ??CoreClaw": {
       "main": [
         [
           {
-            "node": "Wait Before Next Poll",
+            "node": "Wait Before Poll / ????",
             "type": "main",
             "index": 0
           }
@@ -485,11 +530,11 @@
         []
       ]
     },
-    "Wait Before Next Poll": {
+    "Wait Before Poll / ????": {
       "main": [
         [
           {
-            "node": "Get Run Status",
+            "node": "Get Run Status / ????",
             "type": "main",
             "index": 0
           }
@@ -497,11 +542,11 @@
         []
       ]
     },
-    "Get Run Status": {
+    "Get Run Status / ????": {
       "main": [
         [
           {
-            "node": "If Run Terminal",
+            "node": "If Terminal / ????",
             "type": "main",
             "index": 0
           }
@@ -509,47 +554,47 @@
         []
       ]
     },
-    "If Run Terminal": {
+    "If Terminal / ????": {
       "main": [
         [
           {
-            "node": "If Run Succeeded",
+            "node": "If Success / ????",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Wait Before Next Poll",
+            "node": "Wait Before Poll / ????",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "If Run Succeeded": {
+    "If Success / ????": {
       "main": [
         [
           {
-            "node": "Get Run Results",
+            "node": "Get Run Results / ????",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Build Failure Summary",
+            "node": "Failure Summary / ????",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Get Run Results": {
+    "Get Run Results / ????": {
       "main": [
         [
           {
-            "node": "Normalize Business Leads",
+            "node": "Normalize Leads / ?????",
             "type": "main",
             "index": 0
           }
@@ -557,11 +602,11 @@
         []
       ]
     },
-    "Normalize Business Leads": {
+    "Normalize Leads / ?????": {
       "main": [
         [
           {
-            "node": "Remove Duplicates",
+            "node": "Remove Duplicates / ??",
             "type": "main",
             "index": 0
           }
@@ -569,11 +614,11 @@
         []
       ]
     },
-    "Remove Duplicates": {
+    "Remove Duplicates / ??": {
       "main": [
         [
           {
-            "node": "Loop Over Leads",
+            "node": "Loop Leads / ????",
             "type": "main",
             "index": 0
           }
@@ -581,11 +626,11 @@
         []
       ]
     },
-    "Loop Over Leads": {
+    "Loop Leads / ????": {
       "main": [
         [
           {
-            "node": "AI Business Analysis (HTTP)",
+            "node": "AI Business Analysis / AI????",
             "type": "main",
             "index": 0
           }
@@ -593,11 +638,11 @@
         []
       ]
     },
-    "AI Business Analysis (HTTP)": {
+    "AI Business Analysis / AI????": {
       "main": [
         [
           {
-            "node": "Parse AI Output",
+            "node": "Parse AI Output / ??AI??",
             "type": "main",
             "index": 0
           }
@@ -605,11 +650,11 @@
         []
       ]
     },
-    "Parse AI Output": {
+    "Parse AI Output / ??AI??": {
       "main": [
         [
           {
-            "node": "Prepare Google Sheets Rows",
+            "node": "Prepare Sheets Rows / ?????",
             "type": "main",
             "index": 0
           }
@@ -617,11 +662,11 @@
         []
       ]
     },
-    "Prepare Google Sheets Rows": {
+    "Prepare Sheets Rows / ?????": {
       "main": [
         [
           {
-            "node": "Prepare Slack Alerts",
+            "node": "Prepare Slack Alerts / ??Slack??",
             "type": "main",
             "index": 0
           }
@@ -629,11 +674,11 @@
         []
       ]
     },
-    "Prepare Slack Alerts": {
+    "Prepare Slack Alerts / ??Slack??": {
       "main": [
         [
           {
-            "node": "Prepare Notion Pages",
+            "node": "Prepare Notion Pages / ??Notion??",
             "type": "main",
             "index": 0
           }
@@ -641,11 +686,11 @@
         []
       ]
     },
-    "Prepare Notion Pages": {
+    "Prepare Notion Pages / ??Notion??": {
       "main": [
         [
           {
-            "node": "Aggregate Campaign",
+            "node": "Aggregate Campaign / ????",
             "type": "main",
             "index": 0
           }
@@ -653,11 +698,11 @@
         []
       ]
     },
-    "Aggregate Campaign": {
+    "Aggregate Campaign / ????": {
       "main": [
         [
           {
-            "node": "Markdown Report",
+            "node": "Markdown Report / Markdown??",
             "type": "main",
             "index": 0
           }
@@ -665,11 +710,11 @@
         []
       ]
     },
-    "Markdown Report": {
+    "Markdown Report / Markdown??": {
       "main": [
         [
           {
-            "node": "Build Success Summary",
+            "node": "Success Summary / ????",
             "type": "main",
             "index": 0
           }

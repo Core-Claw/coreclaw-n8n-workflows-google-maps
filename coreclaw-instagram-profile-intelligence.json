@@ -7,13 +7,58 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1680,
-        -460
+        -1700,
+        -520
       ],
       "parameters": {
-        "content": "## CoreClaw Instagram账号情报 / Instagram Intel\n\nBilingual local n8n workflow name. CoreClaw official node runs the scraper; standard n8n nodes add AI analysis, routing, aggregation, and payloads for business teams.\n\n??????? CoreClaw ??????????? n8n ?????? AI ??????????????????",
-        "width": 820,
-        "height": 420
+        "content": "## CoreClaw Instagram账号情报 / Instagram Intel\n\n**Purpose (EN):** Instagram profile intelligence.\n\n**???????** Instagram?????\n\nThis workflow uses the official CoreClaw node as the scraping source and combines standard n8n nodes for polling, deduplication, AI enrichment, routing, reporting, and destination payload preparation.\n\n????? CoreClaw ????????????? n8n ????????????AI??????????????????",
+        "width": 760,
+        "height": 380
+      }
+    },
+    {
+      "id": "note-parameters",
+      "name": "Parameters / ??",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        -520
+      ],
+      "parameters": {
+        "content": "## Parameters / ????\n\nEdit **Input Config / ????** before running.\n\n**Example / ???**\n`username=instagram, limit=1`\n\n**Tips / ???**\n- Start with low limits for testing.\n- Increase wait_seconds for larger jobs.\n- Select your CoreClaw credential on each CoreClaw node after import.\n- ?????????????\n- ???????? wait_seconds?\n- ????? CoreClaw ?????????",
+        "width": 700,
+        "height": 380
+      }
+    },
+    {
+      "id": "note-flow",
+      "name": "Flow / ??",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1700,
+        -120
+      ],
+      "parameters": {
+        "content": "## Flow / ??\n\n1. Trigger / ??\n2. Input Config / ????\n3. Start CoreClaw Run / ?? CoreClaw\n4. Wait + Poll / ?????\n5. Get Results / ????\n6. Normalize + Deduplicate / ??????\n7. AI or Enrichment / AI?????\n8. Prepare Payloads + Report / ?????????\n\nUse **Success Summary / ????** to inspect final output.\n?? **Success Summary / ????** ???????",
+        "width": 760,
+        "height": 360
+      }
+    },
+    {
+      "id": "note-output",
+      "name": "Outputs / ??",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        -120
+      ],
+      "parameters": {
+        "content": "## Outputs & Integrations / ?????\n\n**Output (EN):** Creator/brand account profile, opportunity score, partnership action.\n\n**???????** ???????????????????????\n\nRecommended next integrations:\n- Google Sheets / Google ??\n- Airtable or CRM / Airtable ? CRM\n- Slack alerts / Slack ??\n- Notion database / Notion ???\n- Gmail or email outreach / Gmail ?????",
+        "width": 700,
+        "height": 360
       }
     },
     {
@@ -64,7 +109,7 @@
     },
     {
       "id": "start-coreclaw-run",
-      "name": "Start CoreClaw Run / ?? CoreClaw",
+      "name": "Start CoreClaw Run / ??CoreClaw",
       "type": "n8n-nodes-coreclaw.coreClaw",
       "typeVersion": 1,
       "position": [
@@ -115,7 +160,7 @@
       "parameters": {
         "resource": "run",
         "operation": "get",
-        "runSlug": "={{ $('Start CoreClaw Run / ?? CoreClaw').item.json.run_slug }}"
+        "runSlug": "={{ $('Start CoreClaw Run / ??CoreClaw').item.json.run_slug }}"
       },
       "retryOnFail": true,
       "maxTries": 3,
@@ -201,7 +246,7 @@
       "parameters": {
         "resource": "run",
         "operation": "getResults",
-        "runSlug": "={{ $('Start CoreClaw Run / ?? CoreClaw').item.json.run_slug }}",
+        "runSlug": "={{ $('Start CoreClaw Run / ??CoreClaw').item.json.run_slug }}",
         "returnAll": false,
         "limit": "={{ Number($items(\"Input Config / ????\")?.[0]?.json?.limit || 10) }}"
       },
@@ -256,7 +301,7 @@
     },
     {
       "id": "ai-analysis",
-      "name": "AI Analysis / AI ??",
+      "name": "AI Analysis / AI??",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
@@ -289,7 +334,7 @@
     },
     {
       "id": "parse-ai",
-      "name": "Parse AI / ?? AI",
+      "name": "Parse AI / ??AI",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -396,7 +441,7 @@
     },
     {
       "id": "markdown-report",
-      "name": "Markdown Report / Markdown ??",
+      "name": "Markdown Report / Markdown??",
       "type": "n8n-nodes-base.markdown",
       "typeVersion": 1,
       "position": [
@@ -419,7 +464,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const rows=$input.all().map(i=>i.json); const st=$items('Get Run Status / ????')?.[0]?.json||{}; return [{json:{outcome:'success',workflow_name:'CoreClaw Instagram Profile Intel / Instagram????',run_slug:$items('Start CoreClaw Run / ?? CoreClaw')?.[0]?.json?.run_slug||'',run_status:st.status,result_count:st.results,returned_items:rows.length,commercial_value:'Business-ready CoreClaw workflow with AI analysis, routing, payloads, and reporting.',sample:rows.slice(0,3),verified_at:new Date().toISOString()}}];"
+        "jsCode": "const rows=$input.all().map(i=>i.json); const st=$items('Get Run Status / ????')?.[0]?.json||{}; return [{json:{outcome:'success',workflow_name:'CoreClaw Instagram Profile Intel / Instagram????',run_slug:$items('Start CoreClaw Run / ??CoreClaw')?.[0]?.json?.run_slug||'',run_status:st.status,result_count:st.results,returned_items:rows.length,commercial_value:'Business-ready CoreClaw workflow with AI analysis, routing, payloads, and reporting.',sample:rows.slice(0,3),verified_at:new Date().toISOString()}}];"
       }
     },
     {
@@ -454,7 +499,7 @@
       "main": [
         [
           {
-            "node": "Start CoreClaw Run / ?? CoreClaw",
+            "node": "Start CoreClaw Run / ??CoreClaw",
             "type": "main",
             "index": 0
           }
@@ -462,7 +507,7 @@
         []
       ]
     },
-    "Start CoreClaw Run / ?? CoreClaw": {
+    "Start CoreClaw Run / ??CoreClaw": {
       "main": [
         [
           {
@@ -574,7 +619,7 @@
       "main": [
         [
           {
-            "node": "AI Analysis / AI ??",
+            "node": "AI Analysis / AI??",
             "type": "main",
             "index": 0
           }
@@ -582,11 +627,11 @@
         []
       ]
     },
-    "AI Analysis / AI ??": {
+    "AI Analysis / AI??": {
       "main": [
         [
           {
-            "node": "Parse AI / ?? AI",
+            "node": "Parse AI / ??AI",
             "type": "main",
             "index": 0
           }
@@ -594,7 +639,7 @@
         []
       ]
     },
-    "Parse AI / ?? AI": {
+    "Parse AI / ??AI": {
       "main": [
         [
           {
@@ -652,7 +697,7 @@
       "main": [
         [
           {
-            "node": "Markdown Report / Markdown ??",
+            "node": "Markdown Report / Markdown??",
             "type": "main",
             "index": 0
           }
@@ -660,7 +705,7 @@
         []
       ]
     },
-    "Markdown Report / Markdown ??": {
+    "Markdown Report / Markdown??": {
       "main": [
         [
           {
