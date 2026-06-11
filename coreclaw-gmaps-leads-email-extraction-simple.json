@@ -343,7 +343,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "return $input.all().map(item => {\n  const source = JSON.stringify(item.json);\n  const matches = [...new Set((source.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,}/gi) || []).map(e => e.toLowerCase()))];\n  return { json: { ...($items('Normalize Leads / 规范化线索')?.[0]?.json || item.json), discovered_emails: matches.join(', '), email_enrichment_status: matches.length ? 'found' : 'not_found' } };\n});"
+        "jsCode": "return $input.all().map(item => {\n  const source = JSON.stringify(item.json);\n  const matches = [...new Set((source.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi) || []).map(e => e.toLowerCase()))];\n  return { json: { ...item.json, discovered_emails: matches.join(', '), email_enrichment_status: matches.length ? 'found' : 'not_found' } };\n});"
       }
     },
     {

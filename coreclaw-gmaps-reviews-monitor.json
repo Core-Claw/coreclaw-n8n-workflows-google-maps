@@ -390,7 +390,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const source = $items('Loop Leads / 逐条线索')?.[0]?.json || {};\nconst body = $json;\nconst content = body?.choices?.[0]?.message?.content || '{}';\nconst cleaned = String(content).replace(/^```jsons*/i, '').replace(/^```s*/i, '').replace(/```$/i, '').trim();\nlet parsed = {};\ntry { parsed = JSON.parse(cleaned); } catch (error) { parsed = { raw: content }; }\nreturn [{ json: { ...source, ai_persona: parsed.persona || '', ai_pain_point: parsed.pain_point || '', ai_pitch: parsed.pitch || '', ai_next_step: parsed.next_step || '', ai_risk: parsed.risk || '', ai_raw: parsed } }];"
+        "jsCode": "const sourceItems = $items('Remove Duplicates / 去重').map(item => item.json);\nreturn $input.all().map((item, index) => {\n  const source = sourceItems[index] || sourceItems[0] || {};\n  const body = item.json;\n  const content = body?.choices?.[0]?.message?.content || '{}';\n  const cleaned = String(content).replace(/^```json\\s*/i, '').replace(/^```\\s*/i, '').replace(/```$/i, '').trim();\n  let parsed = {};\n  try { parsed = JSON.parse(cleaned); } catch (error) { parsed = { raw: content }; }\n  return { json: { ...source, ai_persona: parsed.persona || '', ai_pain_point: parsed.pain_point || '', ai_pitch: parsed.pitch || '', ai_next_step: parsed.next_step || '', ai_risk: parsed.risk || '', ai_raw: parsed } };\n});"
       }
     },
     {
@@ -618,30 +618,16 @@
       "main": [
         [
           {
-            "node": "Loop Leads / 逐条线索",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
-      ]
-    },
-    "Loop Leads / 逐条线索": {
-      "main": [
-        [
-          {
-            "node": "Aggregate Campaign / 聚合活动",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
             "node": "AI Business Analysis / AI商业分析",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Loop Leads / 逐条线索": {
+      "main": [
+        []
       ]
     },
     "AI Business Analysis / AI商业分析": {
@@ -652,8 +638,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Parse AI Output / 解析AI输出": {
@@ -675,8 +660,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Prepare Slack Alerts / 准备Slack提醒": {
@@ -687,20 +671,18 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Prepare Notion Pages / 准备Notion页面": {
       "main": [
         [
           {
-            "node": "Loop Leads / 逐条线索",
+            "node": "Aggregate Campaign / 聚合活动",
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Aggregate Campaign / 聚合活动": {

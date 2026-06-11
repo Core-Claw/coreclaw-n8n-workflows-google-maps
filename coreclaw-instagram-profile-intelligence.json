@@ -343,7 +343,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const source = $items('Loop Items / 逐条处理')?.[0]?.json || {};\nconst body = $json;\nconst content = body?.choices?.[0]?.message?.content || '{}';\nconst cleaned = String(content).replace(/^```jsons*/i, '').replace(/^```s*/i, '').replace(/```$/i, '').trim();\nlet parsed = {};\ntry { parsed = JSON.parse(cleaned); } catch (error) { parsed = { raw: content }; }\nreturn [{ json: { ...source, ai_opportunity: parsed.opportunity || '', ai_risk: parsed.risk || '', ai_action: parsed.action || '', ai_priority: parsed.priority || '', ai_raw: parsed } }];"
+        "jsCode": "const sourceItems = $items('Remove Duplicates / 去重').map(item => item.json);\nreturn $input.all().map((item, index) => {\n  const source = sourceItems[index] || sourceItems[0] || {};\n  const body = item.json;\n  const content = body?.choices?.[0]?.message?.content || '{}';\n  const cleaned = String(content).replace(/^```json\\s*/i, '').replace(/^```\\s*/i, '').replace(/```$/i, '').trim();\n  let parsed = {};\n  try { parsed = JSON.parse(cleaned); } catch (error) { parsed = { raw: content }; }\n  return { json: { ...source, ai_opportunity: parsed.opportunity || '', ai_risk: parsed.risk || '', ai_action: parsed.action || '', ai_priority: parsed.priority || '', ai_raw: parsed } };\n});"
       }
     },
     {
@@ -607,30 +607,16 @@
       "main": [
         [
           {
-            "node": "Loop Items / 逐条处理",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
-      ]
-    },
-    "Loop Items / 逐条处理": {
-      "main": [
-        [
-          {
-            "node": "Prepare Payloads / 准备载荷",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
             "node": "AI Analysis / AI分析",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Loop Items / 逐条处理": {
+      "main": [
+        []
       ]
     },
     "AI Analysis / AI分析": {
@@ -641,8 +627,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Parse AI / 解析AI": {
@@ -688,8 +673,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Aggregate Results / 聚合结果": {

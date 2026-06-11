@@ -369,7 +369,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const source = $items('Loop Leads / 逐条线索')?.[0]?.json || {};\nconst body = $json;\nconst content = body?.choices?.[0]?.message?.content || '{}';\nconst cleaned = String(content).replace(/^```jsons*/i, '').replace(/^```s*/i, '').replace(/```$/i, '').trim();\nlet parsed = {};\ntry { parsed = JSON.parse(cleaned); } catch (error) { parsed = { raw: content }; }\nreturn [{ json: { ...source, ai_persona: parsed.persona || '', ai_pain_point: parsed.pain_point || '', ai_pitch: parsed.pitch || '', ai_next_step: parsed.next_step || '', ai_risk: parsed.risk || '', ai_raw: parsed } }];"
+        "jsCode": "const sourceItems = $items('Remove Duplicates / 去重').map(item => item.json);\nreturn $input.all().map((item, index) => {\n  const source = sourceItems[index] || sourceItems[0] || {};\n  const body = item.json;\n  const content = body?.choices?.[0]?.message?.content || '{}';\n  const cleaned = String(content).replace(/^```json\\s*/i, '').replace(/^```\\s*/i, '').replace(/```$/i, '').trim();\n  let parsed = {};\n  try { parsed = JSON.parse(cleaned); } catch (error) { parsed = { raw: content }; }\n  return { json: { ...source, ai_persona: parsed.persona || '', ai_pain_point: parsed.pain_point || '', ai_pitch: parsed.pitch || '', ai_next_step: parsed.next_step || '', ai_risk: parsed.risk || '', ai_raw: parsed } };\n});"
       }
     },
     {
@@ -405,7 +405,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "return $input.all().map(item => {\n  const source = JSON.stringify(item.json);\n  const matches = [...new Set((source.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,}/gi) || []).map(e => e.toLowerCase()))];\n  return { json: { ...($items('Loop Leads / 逐条线索')?.[0]?.json || item.json), discovered_emails: matches.join(', '), email_enrichment_status: matches.length ? 'found' : 'not_found' } };\n});"
+        "jsCode": "return $input.all().map(item => {\n  const source = JSON.stringify(item.json);\n  const matches = [...new Set((source.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi) || []).map(e => e.toLowerCase()))];\n  return { json: { ...item.json, discovered_emails: matches.join(', '), email_enrichment_status: matches.length ? 'found' : 'not_found' } };\n});"
       }
     },
     {
@@ -744,30 +744,16 @@
       "main": [
         [
           {
-            "node": "Loop Leads / 逐条线索",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
-      ]
-    },
-    "Loop Leads / 逐条线索": {
-      "main": [
-        [
-          {
-            "node": "Aggregate Campaign / 聚合活动",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
             "node": "AI Business Analysis / AI商业分析",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Loop Leads / 逐条线索": {
+      "main": [
+        []
       ]
     },
     "AI Business Analysis / AI商业分析": {
@@ -778,8 +764,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Parse AI Output / 解析AI输出": {
@@ -801,45 +786,25 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Extract Website Emails / 提取网站邮箱": {
       "main": [
         [
           {
-            "node": "Route by Priority / 按优先级分流",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
-      ]
-    },
-    "Route by Priority / 按优先级分流": {
-      "main": [
-        [
-          {
-            "node": "Hot Leads Queue / 热线索队列",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Warm Leads Queue / 温线索队列",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Nurture Queue / 培育队列",
+            "node": "Prepare Airtable Records / 准备Airtable记录",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Route by Priority / 按优先级分流": {
+      "main": [
+        [],
+        [],
+        []
       ]
     },
     "Hot Leads Queue / 热线索队列": {
@@ -856,8 +821,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Prepare Sheets Rows / 准备表格行": {
@@ -868,8 +832,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Prepare Slack Alerts / 准备Slack提醒": {
@@ -880,20 +843,18 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Prepare Notion Pages / 准备Notion页面": {
       "main": [
         [
           {
-            "node": "Loop Leads / 逐条线索",
+            "node": "Aggregate Campaign / 聚合活动",
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Aggregate Campaign / 聚合活动": {
