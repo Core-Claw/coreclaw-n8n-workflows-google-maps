@@ -10,10 +10,53 @@ const AMAZON_VERSION = 'v1.0.5';
 const INSTAGRAM_SLUG = '01KPD6M5YVHWCNQCRK3W1JD9W2';
 const INSTAGRAM_VERSION = 'v1.0.2';
 
+const LABELS = {
+  manualTrigger: ['Manual Trigger', '手动触发'],
+  scheduleTrigger: ['Every 24 Hours', '每24小时执行'],
+  inputConfig: ['Input Config', '输入配置'],
+  startCoreClawRun: ['Start CoreClaw Run', '启动CoreClaw任务'],
+  waitBeforePoll: ['Wait Before Poll', '等待轮询'],
+  getRunStatus: ['Get Run Status', '获取任务状态'],
+  ifTerminal: ['If Terminal', '是否结束'],
+  ifSuccess: ['If Success', '是否成功'],
+  getRunResults: ['Get Run Results', '获取任务结果'],
+  normalizeRecords: ['Normalize Records', '标准化记录'],
+  removeDuplicates: ['Remove Duplicates', '去重'],
+  aiAnalysis: ['AI Commercial Analysis', 'AI商业分析'],
+  parseAiOutput: ['Parse AI Output', '解析AI输出'],
+  fetchWebsite: ['Fetch Website', '抓取网站'],
+  extractWebsiteSignals: ['Extract Website Signals', '提取网站信号'],
+  preparePayloads: ['Prepare Destination Payloads', '准备目标系统载荷'],
+  aggregateResults: ['Aggregate Results', '汇总结果'],
+  successSummary: ['Success Summary', '成功摘要'],
+  failureSummary: ['Failure Summary', '失败摘要'],
+  stickyOverview: ['Overview', '概览'],
+  stickyInputs: ['Inputs', '输入'],
+  stickyFlow: ['Flow', '流程'],
+  stickyOutputs: ['Outputs', '输出'],
+};
+
+const NODES = Object.fromEntries(
+  Object.entries(LABELS).map(([key, [en, zh]]) => [key, `${en} / ${zh}`])
+);
+
+function workflowName(spec) {
+  return `${spec.name} / ${spec.zhName}`;
+}
+
+function jsSingle(value) {
+  return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function jsDouble(value) {
+  return String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
 const specs = [
   {
     file: 'coreclaw-gmaps-leads-simple.json',
     name: 'CoreClaw Maps Leads',
+    zhName: 'CoreClaw 地图线索',
     kind: 'maps_leads',
     domain: 'maps',
     campaign: 'Local services lead generation',
@@ -28,6 +71,7 @@ const specs = [
   {
     file: 'coreclaw-gmaps-leads-email-extraction-simple.json',
     name: 'CoreClaw Maps Email Finder',
+    zhName: 'CoreClaw 地图邮箱发现',
     kind: 'maps_email_finder',
     domain: 'maps',
     website: true,
@@ -43,6 +87,7 @@ const specs = [
   {
     file: 'coreclaw-gmaps-leads-email-extraction.json',
     name: 'CoreClaw Email Outreach Leads',
+    zhName: 'CoreClaw 邮件外联线索',
     kind: 'email_outreach',
     domain: 'maps',
     ai: true,
@@ -60,6 +105,7 @@ const specs = [
   {
     file: 'coreclaw-gmaps-b2b-enrichment-simple.json',
     name: 'CoreClaw B2B Enrichment',
+    zhName: 'CoreClaw B2B线索增强',
     kind: 'b2b_enrichment',
     domain: 'maps',
     ai: true,
@@ -76,6 +122,7 @@ const specs = [
   {
     file: 'coreclaw-gmaps-leads-complete-enhanced.json',
     name: 'CoreClaw Lead Operations',
+    zhName: 'CoreClaw 完整线索运营',
     kind: 'lead_operations',
     domain: 'maps',
     ai: true,
@@ -93,6 +140,7 @@ const specs = [
   {
     file: 'coreclaw-google-maps-leads-complete-global.json',
     name: 'CoreClaw Global Prospecting',
+    zhName: 'CoreClaw 全球拓客',
     kind: 'global_prospecting',
     domain: 'maps',
     ai: true,
@@ -109,6 +157,7 @@ const specs = [
   {
     file: 'coreclaw-gmaps-to-sheets.json',
     name: 'CoreClaw Sheets Leads',
+    zhName: 'CoreClaw 表格线索',
     kind: 'sheets_leads',
     domain: 'maps',
     campaign: 'Spreadsheet ready lead list',
@@ -123,6 +172,7 @@ const specs = [
   {
     file: 'coreclaw-gmaps-airtable-email.json',
     name: 'CoreClaw Airtable Pipeline',
+    zhName: 'CoreClaw Airtable管道',
     kind: 'airtable_pipeline',
     domain: 'maps',
     website: true,
@@ -138,6 +188,7 @@ const specs = [
   {
     file: 'coreclaw-gmaps-reviews-monitor-simple.json',
     name: 'CoreClaw Reviews Monitor',
+    zhName: 'CoreClaw 评论监控',
     kind: 'reviews_monitor',
     domain: 'reviews',
     trigger: 'schedule',
@@ -155,6 +206,7 @@ const specs = [
   {
     file: 'coreclaw-gmaps-reviews-monitor.json',
     name: 'CoreClaw Reputation Operations',
+    zhName: 'CoreClaw 口碑运营',
     kind: 'reputation_operations',
     domain: 'reviews',
     trigger: 'schedule',
@@ -173,6 +225,7 @@ const specs = [
   {
     file: 'coreclaw-amazon-product-intelligence.json',
     name: 'CoreClaw Amazon Product Intelligence',
+    zhName: 'CoreClaw 亚马逊商品情报',
     kind: 'amazon_product_intelligence',
     domain: 'amazon',
     ai: true,
@@ -188,6 +241,7 @@ const specs = [
   {
     file: 'coreclaw-instagram-profile-intelligence.json',
     name: 'CoreClaw Instagram Profile Intelligence',
+    zhName: 'CoreClaw Instagram账号情报',
     kind: 'instagram_profile_intelligence',
     domain: 'instagram',
     ai: true,
@@ -314,7 +368,7 @@ function coreClawNode(id, name, position, parameters, continueOnFail = false) {
     waitBetweenTries: 5000,
     continueOnFail,
     notesInFlow: true,
-    notes: 'Bind a CoreClaw API credential after import. This node uses the official CoreClaw community package.',
+    notes: 'Bind a CoreClaw API credential after import. / 导入后请绑定 CoreClaw API 凭证。This node uses the official CoreClaw community package. / 本节点使用 CoreClaw 官方社区节点包。',
   });
 }
 
@@ -342,7 +396,7 @@ function ifNode(id, name, position, leftValue, rightValue, operation = 'gte') {
 }
 
 function normalizeMapsCode(kind) {
-  return `const input = $items('Input Config')?.[0]?.json || {};
+  return `const input = $items('${jsSingle(NODES.inputConfig)}')?.[0]?.json || {};
 const rows = $input.all().map(item => item.json || {});
 const workflowKind = ${JSON.stringify(kind)};
 
@@ -490,7 +544,7 @@ function normalizeReviewsCode(kind) {
 }
 
 function normalizeAmazonCode(kind) {
-  return `const input = $items('Input Config')?.[0]?.json || {};
+  return `const input = $items('${jsSingle(NODES.inputConfig)}')?.[0]?.json || {};
 const rows = $input.all().map(item => item.json || {});
 const workflowKind = ${JSON.stringify(kind)};
 
@@ -569,7 +623,7 @@ return rows.map((row, index) => {
 }
 
 function normalizeInstagramCode(kind) {
-  return `const input = $items('Input Config')?.[0]?.json || {};
+  return `const input = $items('${jsSingle(NODES.inputConfig)}')?.[0]?.json || {};
 const rows = $input.all().map(item => item.json || {});
 const workflowKind = ${JSON.stringify(kind)};
 
@@ -643,7 +697,7 @@ return rows.map((row, index) => {
 }
 
 function aiNode() {
-  return node('ai-analysis', 'AI Commercial Analysis', 'n8n-nodes-base.httpRequest', [1160, -100], {
+  return node('ai-analysis', NODES.aiAnalysis, 'n8n-nodes-base.httpRequest', [1160, -100], {
     method: 'POST',
     url: 'https://maas-coding-api.cn-huabei-1.xf-yun.com/v2/chat/completions',
     authentication: 'none',
@@ -670,13 +724,13 @@ function aiNode() {
     waitBetweenTries: 3000,
     continueOnFail: true,
     notesInFlow: true,
-    notes: 'Optional LLM enrichment. Set ASTRON_API_KEY locally or replace the placeholder only in your private n8n instance.',
+    notes: 'Optional LLM enrichment. Set ASTRON_API_KEY locally or replace the placeholder only in your private n8n instance. / 可选大模型增强。请在本地设置 ASTRON_API_KEY，或只在私有 n8n 实例内替换占位值。',
   });
 }
 
 function parseAiCode() {
   return `let sourceItems = [];
-try { sourceItems = $items('Remove Duplicates').map(item => item.json || {}); } catch (error) { sourceItems = []; }
+try { sourceItems = $items('${jsSingle(NODES.removeDuplicates)}').map(item => item.json || {}); } catch (error) { sourceItems = []; }
 
 function parseContent(body) {
   const content = body?.choices?.[0]?.message?.content || body?.data?.choices?.[0]?.message?.content || '';
@@ -706,7 +760,7 @@ return $input.all().map((item, index) => {
 }
 
 function websiteNode(position) {
-  return node('fetch-website', 'Fetch Website', 'n8n-nodes-base.httpRequest', position, {
+  return node('fetch-website', NODES.fetchWebsite, 'n8n-nodes-base.httpRequest', position, {
     method: 'GET',
     url: "={{ $json.website || $json.domain || $json.url || 'https://example.com' }}",
     options: {
@@ -854,8 +908,8 @@ function successSummaryCode(workflowName) {
 const records = Array.isArray(aggregate.records) ? aggregate.records : $input.all().map(item => item.json || {});
 let status = {};
 let input = {};
-try { status = $items('Get Run Status')?.[0]?.json || {}; } catch (error) {}
-try { input = $items('Input Config')?.[0]?.json || {}; } catch (error) {}
+try { status = $items('${jsSingle(NODES.getRunStatus)}')?.[0]?.json || {}; } catch (error) {}
+try { input = $items('${jsSingle(NODES.inputConfig)}')?.[0]?.json || {}; } catch (error) {}
 
 function scoreOf(record) {
   return Number(record.commercial_score ?? record.opportunity_score ?? 0);
@@ -870,7 +924,7 @@ const reportLines = [
   '# ' + ${JSON.stringify(workflowName)},
   '',
   '- Outcome: success',
-  '- CoreClaw run: ' + ($items('Start CoreClaw Run')?.[0]?.json?.run_slug || ''),
+  '- CoreClaw run: ' + ($items('${jsSingle(NODES.startCoreClawRun)}')?.[0]?.json?.run_slug || ''),
   '- Returned records: ' + records.length,
   '- Average commercial score: ' + avgScore,
   '- Alert threshold records: ' + highValue.length,
@@ -886,7 +940,7 @@ return [{
     workflow_name: ${JSON.stringify(workflowName)},
     campaign_name: input.campaign_name || '',
     owner: input.owner || '',
-    run_slug: $items('Start CoreClaw Run')?.[0]?.json?.run_slug || '',
+    run_slug: $items('${jsSingle(NODES.startCoreClawRun)}')?.[0]?.json?.run_slug || '',
     run_status: status.status,
     coreclaw_result_count: status.results ?? status.result_count ?? records.length,
     returned_items: records.length,
@@ -904,8 +958,8 @@ return [{
 function failureSummaryCode(workflowName) {
   return `let status = {};
 let input = {};
-try { status = $items('Get Run Status')?.[0]?.json || {}; } catch (error) {}
-try { input = $items('Input Config')?.[0]?.json || {}; } catch (error) {}
+try { status = $items('${jsSingle(NODES.getRunStatus)}')?.[0]?.json || {}; } catch (error) {}
+try { input = $items('${jsSingle(NODES.inputConfig)}')?.[0]?.json || {}; } catch (error) {}
 
 const statusCode = Number(status.status || 0);
 const diagnosis = status.error || status.err_msg || status.message || (statusCode === 4 ? 'CoreClaw run failed.' : statusCode === 5 ? 'CoreClaw run was aborted.' : 'CoreClaw run did not complete successfully.');
@@ -915,7 +969,7 @@ return [{
     outcome: 'failure',
     workflow_name: ${JSON.stringify(workflowName)},
     campaign_name: input.campaign_name || '',
-    run_slug: $items('Start CoreClaw Run')?.[0]?.json?.run_slug || '',
+    run_slug: $items('${jsSingle(NODES.startCoreClawRun)}')?.[0]?.json?.run_slug || '',
     run_status: status.status,
     diagnosis,
     recommended_fix: 'Check CoreClaw run logs, verify scraper parameters and quota, then re-run with a small limit before scaling.',
@@ -965,14 +1019,14 @@ function coreRunParams(spec) {
 
 function resultLimitExpression(spec) {
   if (spec.domain === 'amazon' || spec.domain === 'instagram') {
-    return '={{ Number($items("Input Config")?.[0]?.json?.limit || 10) }}';
+    return `={{ Number($items("${jsDouble(NODES.inputConfig)}")?.[0]?.json?.limit || 10) }}`;
   }
-  return '={{ Number($items("Input Config")?.[0]?.json?.max_results || 10) }}';
+  return `={{ Number($items("${jsDouble(NODES.inputConfig)}")?.[0]?.json?.max_results || 10) }}`;
 }
 
 function triggerNode(spec) {
   if (spec.trigger === 'schedule') {
-    return node('schedule-trigger', 'Every 24 Hours', 'n8n-nodes-base.scheduleTrigger', [-1460, 120], {
+    return node('schedule-trigger', NODES.scheduleTrigger, 'n8n-nodes-base.scheduleTrigger', [-1460, 120], {
       rule: {
         interval: [
           {
@@ -983,124 +1037,180 @@ function triggerNode(spec) {
       },
     });
   }
-  return node('manual-trigger', 'Manual Trigger', 'n8n-nodes-base.manualTrigger', [-1460, 120], {});
+  return node('manual-trigger', NODES.manualTrigger, 'n8n-nodes-base.manualTrigger', [-1460, 120], {});
 }
 
 function connect(connections, from, outputs) {
   connections[from] = { main: outputs.map(output => output.map(nodeName => ({ node: nodeName, type: 'main', index: 0 }))) };
 }
 
+function sourceDescription(spec) {
+  if (spec.domain === 'amazon') return 'Amazon marketplace product listings / 亚马逊商品列表';
+  if (spec.domain === 'instagram') return 'Instagram profile intelligence / Instagram账号情报';
+  if (spec.domain === 'reviews') return 'Google Maps businesses and fresh reviews / Google Maps商家与最新评论';
+  return 'Google Maps business search / Google Maps商家搜索';
+}
+
+function stickyNote(id, name, position, content, width = 720, height = 260) {
+  return node(id, name, 'n8n-nodes-base.stickyNote', position, {
+    content,
+    height,
+    width,
+  }, { typeVersion: 1 });
+}
+
+function stickyNotes(spec) {
+  const name = workflowName(spec);
+  const trigger = spec.trigger === 'schedule' ? 'Runs every 24 hours / 每24小时自动执行' : 'Manual operator trigger / 人工手动触发';
+  const enrichment = [
+    spec.website ? 'Website signal extraction / 网站公开信号提取' : '',
+    spec.ai ? 'Optional LLM business analysis / 可选大模型商业分析' : '',
+  ].filter(Boolean).join('\n- ') || 'CoreClaw data normalization and scoring / CoreClaw数据标准化与评分';
+
+  return [
+    stickyNote('sticky-overview', NODES.stickyOverview, [-1460, -520], `## ${NODES.stickyOverview}
+Workflow / 工作流: ${name}
+
+Business goal: turn live CoreClaw data into prioritized, CRM-ready operating records.
+
+业务目标：把实时 CoreClaw 数据转成可进入 CRM、表格和运营系统的高优先级业务记录。`),
+    stickyNote('sticky-inputs', NODES.stickyInputs, [-700, -520], `## ${NODES.stickyInputs}
+Source / 数据源: ${sourceDescription(spec)}
+
+Trigger / 触发方式: ${trigger}
+
+Key inputs / 关键输入: campaign, owner, ICP, offer, proxy region, wait time, and result limits.
+
+关键参数会在 ${NODES.inputConfig} 节点集中维护，方便导入后按客户场景修改。`),
+    stickyNote('sticky-flow', NODES.stickyFlow, [-1460, -220], `## ${NODES.stickyFlow}
+1. Start CoreClaw run / 启动 CoreClaw 任务
+2. Poll until terminal status / 轮询直到任务结束
+3. Normalize and deduplicate records / 标准化并去重
+4. Enrich, score, and route / 增强、评分、路由
+
+- ${enrichment}`),
+    stickyNote('sticky-outputs', NODES.stickyOutputs, [-700, -220], `## ${NODES.stickyOutputs}
+Each successful run returns an executive summary plus destination payloads.
+
+每次成功执行都会输出执行摘要，以及可直接对接的目标系统 payload。
+
+Outputs / 输出: Google Sheets, Airtable, CRM, Slack, Notion, email draft, webhook, evidence fields, and recommended next actions.`),
+  ];
+}
+
 function buildWorkflow(spec) {
+  const displayName = workflowName(spec);
   const nodes = [
+    ...stickyNotes(spec),
     triggerNode(spec),
-    node('input-config', 'Input Config', 'n8n-nodes-base.set', [-1200, 120], {
+    node('input-config', NODES.inputConfig, 'n8n-nodes-base.set', [-1200, 120], {
       assignments: { assignments: inputAssignments(spec) },
       options: {},
     }),
-    coreClawNode('start-coreclaw-run', 'Start CoreClaw Run', [-900, 120], coreRunParams(spec)),
-    node('wait-before-poll', 'Wait Before Poll', 'n8n-nodes-base.wait', [-640, 120], {
+    coreClawNode('start-coreclaw-run', NODES.startCoreClawRun, [-900, 120], coreRunParams(spec)),
+    node('wait-before-poll', NODES.waitBeforePoll, 'n8n-nodes-base.wait', [-640, 120], {
       resume: 'timeInterval',
-      amount: '={{ Number($items("Input Config")?.[0]?.json?.wait_seconds || 15) }}',
+      amount: `={{ Number($items("${jsDouble(NODES.inputConfig)}")?.[0]?.json?.wait_seconds || 15) }}`,
       unit: 'seconds',
     }),
-    coreClawNode('get-run-status', 'Get Run Status', [-380, 120], {
+    coreClawNode('get-run-status', NODES.getRunStatus, [-380, 120], {
       resource: 'run',
       operation: 'get',
-      runSlug: "={{ $('Start CoreClaw Run').item.json.run_slug }}",
+      runSlug: `={{ $('${jsSingle(NODES.startCoreClawRun)}').item.json.run_slug }}`,
     }, true),
-    ifNode('if-terminal', 'If Terminal', [-120, 120], '={{ $json.error ? 4 : Number($json.status) }}', 3, 'gte'),
-    ifNode('if-success', 'If Success', [120, 40], '={{ $json.error ? 4 : Number($json.status) }}', 3, 'equals'),
-    coreClawNode('get-run-results', 'Get Run Results', [380, -100], {
+    ifNode('if-terminal', NODES.ifTerminal, [-120, 120], '={{ $json.error ? 4 : Number($json.status) }}', 3, 'gte'),
+    ifNode('if-success', NODES.ifSuccess, [120, 40], '={{ $json.error ? 4 : Number($json.status) }}', 3, 'equals'),
+    coreClawNode('get-run-results', NODES.getRunResults, [380, -100], {
       resource: 'run',
       operation: 'getResults',
-      runSlug: "={{ $('Start CoreClaw Run').item.json.run_slug }}",
+      runSlug: `={{ $('${jsSingle(NODES.startCoreClawRun)}').item.json.run_slug }}`,
       returnAll: false,
       limit: resultLimitExpression(spec),
     }),
-    node('normalize-records', 'Normalize Records', 'n8n-nodes-base.code', [640, -100], {
+    node('normalize-records', NODES.normalizeRecords, 'n8n-nodes-base.code', [640, -100], {
       mode: 'runOnceForAllItems',
       jsCode: normalizeCode(spec),
     }),
-    node('remove-duplicates', 'Remove Duplicates', 'n8n-nodes-base.removeDuplicates', [900, -100], {
+    node('remove-duplicates', NODES.removeDuplicates, 'n8n-nodes-base.removeDuplicates', [900, -100], {
       compare: 'selectedFields',
       fieldsToCompare: 'record_key',
       options: {},
     }),
   ];
 
-  let previous = 'Remove Duplicates';
+  let previous = NODES.removeDuplicates;
   let x = 1160;
 
   if (spec.ai) {
     const ai = aiNode();
     ai.position = [x, -100];
     nodes.push(ai);
-    nodes.push(node('parse-ai-output', 'Parse AI Output', 'n8n-nodes-base.code', [x + 260, -100], {
+    nodes.push(node('parse-ai-output', NODES.parseAiOutput, 'n8n-nodes-base.code', [x + 260, -100], {
       mode: 'runOnceForAllItems',
       jsCode: parseAiCode(),
     }));
-    previous = 'Parse AI Output';
+    previous = NODES.parseAiOutput;
     x += 520;
   }
 
   if (spec.website) {
     nodes.push(websiteNode([x, -100]));
-    nodes.push(node('extract-website-signals', 'Extract Website Signals', 'n8n-nodes-base.code', [x + 260, -100], {
+    nodes.push(node('extract-website-signals', NODES.extractWebsiteSignals, 'n8n-nodes-base.code', [x + 260, -100], {
       mode: 'runOnceForAllItems',
       jsCode: extractWebsiteCode(previous),
     }));
-    previous = 'Extract Website Signals';
+    previous = NODES.extractWebsiteSignals;
     x += 520;
   }
 
   nodes.push(
-    node('prepare-payloads', 'Prepare Destination Payloads', 'n8n-nodes-base.code', [x, -100], {
+    node('prepare-payloads', NODES.preparePayloads, 'n8n-nodes-base.code', [x, -100], {
       mode: 'runOnceForAllItems',
-      jsCode: preparePayloadsCode(spec.name),
+      jsCode: preparePayloadsCode(displayName),
     }),
-    node('aggregate-results', 'Aggregate Results', 'n8n-nodes-base.aggregate', [x + 260, -100], {
+    node('aggregate-results', NODES.aggregateResults, 'n8n-nodes-base.aggregate', [x + 260, -100], {
       aggregate: 'aggregateAllItemData',
       destinationFieldName: 'records',
       options: {},
     }),
-    node('success-summary', 'Success Summary', 'n8n-nodes-base.code', [x + 520, -100], {
+    node('success-summary', NODES.successSummary, 'n8n-nodes-base.code', [x + 520, -100], {
       mode: 'runOnceForAllItems',
-      jsCode: successSummaryCode(spec.name),
+      jsCode: successSummaryCode(displayName),
     }),
-    node('failure-summary', 'Failure Summary', 'n8n-nodes-base.code', [380, 240], {
+    node('failure-summary', NODES.failureSummary, 'n8n-nodes-base.code', [380, 240], {
       mode: 'runOnceForAllItems',
-      jsCode: failureSummaryCode(spec.name),
+      jsCode: failureSummaryCode(displayName),
     }),
   );
 
   const connections = {};
-  connect(connections, spec.trigger === 'schedule' ? 'Every 24 Hours' : 'Manual Trigger', [['Input Config']]);
-  connect(connections, 'Input Config', [['Start CoreClaw Run']]);
-  connect(connections, 'Start CoreClaw Run', [['Wait Before Poll']]);
-  connect(connections, 'Wait Before Poll', [['Get Run Status']]);
-  connect(connections, 'Get Run Status', [['If Terminal']]);
-  connect(connections, 'If Terminal', [['If Success'], ['Wait Before Poll']]);
-  connect(connections, 'If Success', [['Get Run Results'], ['Failure Summary']]);
-  connect(connections, 'Get Run Results', [['Normalize Records']]);
-  connect(connections, 'Normalize Records', [['Remove Duplicates']]);
+  connect(connections, spec.trigger === 'schedule' ? NODES.scheduleTrigger : NODES.manualTrigger, [[NODES.inputConfig]]);
+  connect(connections, NODES.inputConfig, [[NODES.startCoreClawRun]]);
+  connect(connections, NODES.startCoreClawRun, [[NODES.waitBeforePoll]]);
+  connect(connections, NODES.waitBeforePoll, [[NODES.getRunStatus]]);
+  connect(connections, NODES.getRunStatus, [[NODES.ifTerminal]]);
+  connect(connections, NODES.ifTerminal, [[NODES.ifSuccess], [NODES.waitBeforePoll]]);
+  connect(connections, NODES.ifSuccess, [[NODES.getRunResults], [NODES.failureSummary]]);
+  connect(connections, NODES.getRunResults, [[NODES.normalizeRecords]]);
+  connect(connections, NODES.normalizeRecords, [[NODES.removeDuplicates]]);
 
-  previous = 'Remove Duplicates';
+  previous = NODES.removeDuplicates;
   if (spec.ai) {
-    connect(connections, previous, [['AI Commercial Analysis']]);
-    connect(connections, 'AI Commercial Analysis', [['Parse AI Output']]);
-    previous = 'Parse AI Output';
+    connect(connections, previous, [[NODES.aiAnalysis]]);
+    connect(connections, NODES.aiAnalysis, [[NODES.parseAiOutput]]);
+    previous = NODES.parseAiOutput;
   }
   if (spec.website) {
-    connect(connections, previous, [['Fetch Website']]);
-    connect(connections, 'Fetch Website', [['Extract Website Signals']]);
-    previous = 'Extract Website Signals';
+    connect(connections, previous, [[NODES.fetchWebsite]]);
+    connect(connections, NODES.fetchWebsite, [[NODES.extractWebsiteSignals]]);
+    previous = NODES.extractWebsiteSignals;
   }
-  connect(connections, previous, [['Prepare Destination Payloads']]);
-  connect(connections, 'Prepare Destination Payloads', [['Aggregate Results']]);
-  connect(connections, 'Aggregate Results', [['Success Summary']]);
+  connect(connections, previous, [[NODES.preparePayloads]]);
+  connect(connections, NODES.preparePayloads, [[NODES.aggregateResults]]);
+  connect(connections, NODES.aggregateResults, [[NODES.successSummary]]);
 
   return {
-    name: spec.name,
+    name: displayName,
     nodes,
     connections,
     active: false,
@@ -1132,8 +1242,21 @@ function validateWorkflow(workflow) {
   }
   const triggers = workflow.nodes.filter(n => n.type.includes('Trigger'));
   const allowedNoInbound = new Set(triggers.map(n => n.name));
+  for (const sticky of workflow.nodes.filter(n => n.type === 'n8n-nodes-base.stickyNote')) {
+    allowedNoInbound.add(sticky.name);
+  }
   const noInbound = workflow.nodes.filter(n => !inbound.has(n.name) && !allowedNoInbound.has(n.name));
   if (noInbound.length) throw new Error(`Unconnected nodes: ${noInbound.map(n => n.name).join(', ')}`);
+
+  const missingBilingualNames = workflow.nodes
+    .filter(n => n.type !== 'n8n-nodes-base.stickyNote')
+    .filter(n => !n.name.includes(' / ') || !/[\u4e00-\u9fff]/.test(n.name));
+  if (missingBilingualNames.length) throw new Error(`Nodes missing bilingual names: ${missingBilingualNames.map(n => n.name).join(', ')}`);
+
+  const stickyNotes = workflow.nodes.filter(n => n.type === 'n8n-nodes-base.stickyNote');
+  if (stickyNotes.length < 4) throw new Error(`Missing bilingual sticky notes in ${workflow.name}`);
+  const badStickyNotes = stickyNotes.filter(n => !/[\u4e00-\u9fff]/.test(n.parameters?.content || '') || !/[A-Za-z]/.test(n.parameters?.content || ''));
+  if (badStickyNotes.length) throw new Error(`Sticky notes missing bilingual content: ${badStickyNotes.map(n => n.name).join(', ')}`);
 }
 
 for (const spec of specs) {

@@ -8,7 +8,7 @@ try {
 const N8N_EMAIL = requireEnv('N8N_EMAIL');
 const N8N_PASSWORD = requireEnv('N8N_PASSWORD');
 const WORKFLOW_ID = process.argv[2] || 'U2dHVWuYZF5WDZhb';
-const DESTINATION_NODE = process.argv[3] || 'Success Summary';
+const DESTINATION_NODE = process.argv[3] || 'Success Summary / 成功摘要';
 const EXISTING_EXECUTION_ID = process.argv[4] || '';
 
 function requireEnv(name) {
@@ -54,6 +54,15 @@ function unwrapExecution(body) {
     execution.data = parseFlatted(execution.data);
   }
   return execution;
+}
+
+function resolveNodeName(workflow, requestedName) {
+  const nodes = workflow.nodes || [];
+  const exact = nodes.find(node => node.name === requestedName);
+  if (exact) return exact.name;
+  const bilingual = nodes.find(node => node.name.startsWith(`${requestedName} / `));
+  if (bilingual) return bilingual.name;
+  return requestedName;
 }
 
 function lastOutput(execution, nodeName) {
@@ -103,11 +112,12 @@ async function main() {
   const workflow = unwrapWorkflow((await request(`/rest/workflows/${WORKFLOW_ID}`, {}, cookie)).body);
   const trigger = workflow.nodes.find(node => node.type.includes('manualTrigger') || node.type.includes('scheduleTrigger'));
   if (!trigger) throw new Error('No supported trigger node found');
+  const destinationNodeName = resolveNodeName(workflow, DESTINATION_NODE);
 
   const payload = {
     workflowData: workflow,
     startNodes: [{ name: trigger.name, sourceData: null }],
-    destinationNode: { nodeName: DESTINATION_NODE, mode: 'inclusive' },
+    destinationNode: { nodeName: destinationNodeName, mode: 'inclusive' },
     runData: {},
     pinData: {},
   };
@@ -138,7 +148,7 @@ async function main() {
     await sleep(5000);
   }
 
-  const output = lastOutput(execution, DESTINATION_NODE);
+  const output = lastOutput(execution, destinationNodeName);
   const compact = process.env.COMPACT_OUTPUT === '1';
   console.log(JSON.stringify({
     workflowId: WORKFLOW_ID,
